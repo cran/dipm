@@ -1,12 +1,12 @@
-4ff3fcfe7727162e07bb131e5a7ff0cf *DESCRIPTION
-fff7ce86e5ff028f2f231a5539d4f3a5 *NAMESPACE
+88837420068af83475add0d94fbe64fa *DESCRIPTION
+2b8ce292b12ad78747e727ff4727c4b0 *NAMESPACE
 eae118348b86f57875ffbef3ea34fab1 *R/coxph_R_to_C.R
 dad5305480eb84e3fddbd5a1c675b72c *R/coxph_R_to_C_multi.R
 573d6e56b28bfb9092d4a30a964ca94b *R/dipm.R
 7f817c4b9fa9119ef40368726ff3c34f *R/ini_node.R
 654281464b97a19fdde01f57ece9ecb3 *R/lm_R_to_C.R
 127a51a7b344ab1fcfcfc19e59c13e58 *R/node_dipm.R
-9e20852f544868d96da700dfbae27a7d *R/pmprune.R
+a0541a666a61244682e3c5a9182aa826 *R/pmprune.R
 f8de546768269bd7591b462a75cf670b *R/print.dipm.R
 a005edff13ec92a3130477daa08aa3d7 *R/spmtree.R
 f17766070ef622a7a1393fae6301a8f0 *man/coxph_R_to_C.Rd
@@ -14,8 +14,9 @@ f17766070ef622a7a1393fae6301a8f0 *man/coxph_R_to_C.Rd
 7e7d71d079b4c6360c56d4063f188b65 *man/dipm.Rd
 9dde6f243b11348d215c352417f62ebc *man/lm_R_to_C.Rd
 5938e28179b21b355e81c97c0f1e9da8 *man/node_dipm.Rd
-212fb706e1474e61e740b3c9409145a0 *man/pmprune.Rd
+15ba584332503badc3ab1a9919235fc8 *man/pmprune.Rd
 95e788e1d710f7ee724338916f448e17 *man/predict_dipm.Rd
 9ae13cc8cdbfa04aa5c10a134bb16b07 *man/spmtree.Rd
 b74dc1ddb59ed45f4a508624ad4d00ca *src/Makevars
-8bc8a9847c6e110334107bbdd16f27ee *src/dipm.c
+139d6964cbd0d6189dd5a3524f5a0469 *src/dipm.c
+99d18dfae1575b0d25d32cbc7d4c5917 *src/dipm_init.c

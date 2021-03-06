@@ -85,7 +85,8 @@
 #' #     and three treatment groups
 #' #
 #' 
-#' N=300
+#' \donttest{
+#' N=100
 #' set.seed(123)
 #' 
 #' # generate treatments
@@ -125,6 +126,7 @@
 #'
 #' # prune the tree
 #' ptree=pmprune(tree)
+#' }
 #' 
 #' @export
 

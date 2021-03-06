@@ -87,7 +87,8 @@ This function implements the simple pruning strategy
 #     and three treatment groups
 #
 
-N=300
+\donttest{
+N=100
 set.seed(123)
 
 # generate treatments
@@ -127,6 +128,7 @@ tree=spmtree(Y~treatment | .,data,types=types,dataframe=TRUE)
 
 # prune the tree
 ptree=pmprune(tree)
+}
 
 }
 \references{

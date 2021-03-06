@@ -34,7 +34,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <omp.h>        // OpenMP for multiple threads
+#ifdef _OPENMP
+# include <omp.h>        // OpenMP for multiple threads
+#endif
 #include <R.h>          // for Rprintf
 #include <Rmath.h>
 #include <Rdefines.h>
@@ -4810,7 +4812,9 @@ get_bestvar(int current_node,
         varimp0[i]=(double *)calloc(nc,sizeof(double));
     }
 
-    omp_set_num_threads(ncores);
+    #ifdef _OPENMP
+     omp_set_num_threads(ncores);
+    #endif
 
     #pragma omp parallel private(i,j)
     {
@@ -6281,7 +6285,11 @@ maketree(SEXP R_ntree,
     }
 
 //   set number of cores for multiple-thread processing
-    int ncores=omp_get_num_procs();
+    #ifdef _OPENMP
+      int ncores=omp_get_num_procs();
+    #else
+      int ncores=1;
+    #endif
     if ( ntree < ncores ) ncores=ntree;
 
 //   initialize root node
