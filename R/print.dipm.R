@@ -503,7 +503,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
       #        print header
       if ( method == -1 ) {
         
-        prinm(paste("PM Tree ",
+        message(paste("SPM Tree ",
                     "(Continuous Y, ",
                     "2 treatments",
                     "):",
@@ -511,7 +511,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 6 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Continuous Y, ",
                     "2 treatments, ",
                     "no mtry, ",
@@ -521,7 +521,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 7 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Continuous Y, ",
                     "2 treatments, ",
                     "yes mtry, ",
@@ -531,7 +531,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 11 ) {
         
-        prinm(paste("PM Tree ",
+        message(paste("SPM Tree ",
                     "(Survival Y, ",
                     "2 treatments",
                     "):",
@@ -539,7 +539,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 12 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Survival Y, ",
                     "2 treatments, ",
                     "no mtry, ",
@@ -549,7 +549,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 13 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Survival Y, ",
                     "2 treatments, ",
                     "yes mtry, ",
@@ -559,7 +559,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 20 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Survival Y, ",
                     "2+ treatments, ",
                     "no mtry, ",
@@ -569,7 +569,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 21 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Survival Y, ",
                     "2+ treatments, ",
                     "yes mtry, ",
@@ -579,7 +579,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 22 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Continuous Y, ",
                     "2+ treatments, ",
                     "no mtry, ",
@@ -589,7 +589,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 23 ) {
         
-        prinm(paste("DIPM Tree ",
+        message(paste("DIPM Tree ",
                     "(Continuous Y, ",
                     "2+ treatments, ",
                     "yes mtry, ",
@@ -599,7 +599,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 24 ) {
         
-        prinm(paste("PM Tree ",
+        message(paste("SPM Tree ",
                     "(Continuous Y, ",
                     "2+ treatments",
                     "):",
@@ -607,7 +607,7 @@ print.dipm <- function(tree_txt,X,Y,C,treatment,
         
       } else if ( method == 25 ) {
         
-        prinm(paste("PM Tree ",
+        message(paste("SPM Tree ",
                     "(Survival Y, ",
                     "2+ treatments",
                     "):",

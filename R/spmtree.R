@@ -218,6 +218,9 @@
 #' 
 #' # fit a classification tree
 #' tree1=spmtree(Y~treatment | .,data,maxdepth=3)
+#' # predict optimal treatment for new subjects
+#' predict(tree1, newdata=head(data), 
+#' FUN = function(n)  as.numeric(n$info$opt_trt))
 #'
 #'\donttest{
 #' #
@@ -423,7 +426,7 @@ spmtree <- function(formula,
     treatment=data[,form_rhs[1]]
 
 #    determine appropriate method from data
-    ntrts=length(levels(as.factor(treatment)))
+    ntrts=nlevels(as.factor(treatment))
 
     if ( ntrts <= 1 ) {
         stop("At least 2 treatment groups are required.")
@@ -488,7 +491,7 @@ spmtree <- function(formula,
         types=rep(2,nc) # default is to assume all candidate
                         # split variables are ordinal
 
-        prinm("Note that all candidate split variables are assumed to be ordinal.")
+        message("Note that all candidate split variables are assumed to be ordinal.")
 
     } else {
 
@@ -560,7 +563,8 @@ spmtree <- function(formula,
                mtry=mtry,
                maxdepth=maxdepth,
                maxdepth2=maxdepth2,
-               method=method)
+               method=method,
+               environment(lm_R_to_C))
 
     rm(XC)
 

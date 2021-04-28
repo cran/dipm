@@ -1,5 +1,5 @@
 useDynLib(dipm, .registration = TRUE)
-export(dipm,spmtree,pmprune,coxph_R_to_C,coxph_R_to_C_multi,lm_R_to_C,predict_dipm,node_dipm)
+export(dipm,spmtree,pmprune,node_dipm)
 import(survival)
 import(partykit)
 import(ggplot2)

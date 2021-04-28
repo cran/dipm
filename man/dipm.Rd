@@ -253,6 +253,9 @@ data=data.frame(X,Y,treatment)
 
 # fit a dipm classification tree 
 tree1=dipm(Y~treatment | .,data,mtry=1,maxdepth=3)
+# predict optimal treatment for new subjects
+predict(tree1, newdata=head(data), 
+FUN = function(n)  as.numeric(n$info$opt_trt))
 
 \donttest{
 #

@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <math.h>
 #ifdef _OPENMP
-# include <omp.h>        // OpenMP for multiple threads
+#include <omp.h>        // OpenMP for multiple threads
 #endif
 #include <R.h>          // for Rprintf
 #include <Rmath.h>
@@ -853,8 +853,11 @@ invert_matrix3(double m[],
 
 double
 get_coxph_stat2(int nsubj,
-                double **X)
+                double **X,
+                SEXP in_namespace)
 {
+
+    SEXP dipmNamespace = in_namespace;
 
 //   prepare Cox data for R
     SEXP cox_data;
@@ -872,7 +875,7 @@ get_coxph_stat2(int nsubj,
     PROTECT(coxph_R=lang2(install("coxph_R_to_C"),cox_data));
 
 //   get stat from "coxph" function in R
-    SEXP val_R=PROTECT(eval(coxph_R,R_GlobalEnv));
+    SEXP val_R=PROTECT(eval(coxph_R,dipmNamespace));
     val_R=coerceVector(val_R,REALSXP);
     double val=REAL(val_R)[0];
 
@@ -890,8 +893,11 @@ get_coxph_stat2(int nsubj,
 
 double
 get_lmstat_mc(int nsubj,
-              double **X)
+              double **X,
+              SEXP in_namespace)
 {
+
+    SEXP dipmNamespace = in_namespace;
 
 //   prepare Cox data for R
     SEXP lm_data;
@@ -909,7 +915,7 @@ get_lmstat_mc(int nsubj,
     PROTECT(lm_R=lang2(install("lm_R_to_C"),lm_data));
 
 //   get stat from "coxph" function in R
-    SEXP val_R=PROTECT(eval(lm_R,R_GlobalEnv));
+    SEXP val_R=PROTECT(eval(lm_R,dipmNamespace));
     val_R=coerceVector(val_R,REALSXP);
     double val=REAL(val_R)[0];
 
@@ -927,8 +933,11 @@ get_lmstat_mc(int nsubj,
 
 double
 get_coxph_stat2_multi(int nsubj,
-                      double **X)
+                      double **X,
+                      SEXP in_namespace)
 {
+
+    SEXP dipmNamespace = in_namespace;
 
 //   prepare Cox data for R
     SEXP cox_data;
@@ -947,7 +956,7 @@ get_coxph_stat2_multi(int nsubj,
             cox_data));
 
 //   get stat from "coxph" function in R
-    SEXP val_R=PROTECT(eval(coxph_R,R_GlobalEnv));
+    SEXP val_R=PROTECT(eval(coxph_R,dipmNamespace));
     val_R=coerceVector(val_R,REALSXP);
     double val=REAL(val_R)[0];
 
@@ -974,7 +983,8 @@ get_coxph_stat(int current_node,
                int *treat,
                int *censor,
                int method,
-               struct node *tree)
+               struct node *tree,
+               SEXP in_namespace)
 
 //
 //  This function accepts as arguments the integer
@@ -1054,11 +1064,11 @@ get_coxph_stat(int current_node,
     double stat=0;
     if ( method >= 20 ) {  // multi-treat methods
 
-        stat=get_coxph_stat2_multi(nsubj,cox_data);
+        stat=get_coxph_stat2_multi(nsubj,cox_data,in_namespace);
 
     } else {               // binary treat methods
 
-        stat=get_coxph_stat2(nsubj,cox_data);
+        stat=get_coxph_stat2(nsubj,cox_data,in_namespace);
     }
 
 
@@ -2458,7 +2468,8 @@ get_split0_cox(int i,    // 0=left 1=right candidate node
                int *censor,
                int method,
                struct node *tree,
-               struct cand *cands)
+               struct cand *cands,
+               SEXP in_namespace)
 
 //
 //  This function accepts as arguments integer
@@ -2512,7 +2523,7 @@ get_split0_cox(int i,    // 0=left 1=right candidate node
 /*
         cands[i].val=get_coxph_stat(tree[lll-1].parent,n,nc,y,data,
                                     types,ncat,treat,censor,method,
-                                    tree);
+                                    tree,in_namespace);
 */
     }
 }
@@ -2544,7 +2555,8 @@ get_comb_vals_surv(int current_node,
                    double max,
                    struct node temp_tree[],
                    struct cand *cands,
-                   struct node *best_split)
+                   struct node *best_split,
+                   SEXP in_namespace)
 
 //
 //  This function accepts as arguments array 
@@ -2605,12 +2617,14 @@ get_comb_vals_surv(int current_node,
 //       get values for left child candidate node
         temp_tree[current_node].val=nom_lval;
         get_split0_cox(0,current_node+1,n,nc,y,data,types,ncat,
-                       treat,censor,method,temp_tree,cands);
+                       treat,censor,method,temp_tree,cands,
+                       in_namespace);
 
 //       get values for right child candidate node
         temp_tree[current_node+1].val=nom_rval;
         get_split0_cox(1,current_node+2,n,nc,y,data,types,ncat,
-                       treat,censor,method,temp_tree,cands);
+                       treat,censor,method,temp_tree,cands,
+                       in_namespace);
 
 //       candidate splits with too few subjects are not useful
         if ( (cands[0].n0 <= nmin2) || 
@@ -2623,7 +2637,7 @@ get_comb_vals_surv(int current_node,
 
         double score=get_coxph_stat(current_node,n,nc,y,data,types,
                                     ncat,treat,censor,method,
-                                    temp_tree);
+                                    temp_tree,in_namespace);
 
         if ( score > max ) {
 
@@ -2668,13 +2682,13 @@ get_comb_vals_surv(int current_node,
                            ncat,treat,censor,nmin2,method,temp,cats,
                            n_cat,k,ncat_original,n_splits,counter,
                            cat_index+1,k_index+1,max,temp_tree,cands,
-                           best_split);
+                           best_split,in_namespace);
 
     max=get_comb_vals_surv(current_node,current_var,n,nc,y,data,types,
                            ncat,treat,censor,nmin2,method,temp,cats,
                            n_cat,k,ncat_original,n_splits,counter,
                            cat_index+1,k_index,max,temp_tree,cands,
-                           best_split);
+                           best_split,in_namespace);
 
     return(max);
 }
@@ -2694,7 +2708,8 @@ get_split2_cox_all(int current_node,
                    struct node *tree,
                    int nmin2,
                    int method,
-                   struct node *best_split)
+                   struct node *best_split,
+                   SEXP in_namespace)
 
 //  
 //  This function accepts as arguments the integer
@@ -2799,7 +2814,7 @@ get_split2_cox_all(int current_node,
             temp_tree[current_node].val=0;
 
             get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           get values for right child candidate node
             temp_tree[current_node+1].type=1;
@@ -2807,7 +2822,7 @@ get_split2_cox_all(int current_node,
             temp_tree[current_node+1].val=1;
 
             get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           candidate splits with too few subjects are not useful
             if ( (cands[0].n0 <= nmin2) || (cands[0].n1 <= nmin2) || 
@@ -2818,7 +2833,8 @@ get_split2_cox_all(int current_node,
 
 
             score=get_coxph_stat(current_node,n,nc,y,data,types,
-                                 ncat,treat,censor,method,temp_tree);
+                                 ncat,treat,censor,method,temp_tree,
+                                 in_namespace);
 
             if ( score > max ) {
 
@@ -2864,14 +2880,15 @@ get_split2_cox_all(int current_node,
                 temp_tree[current_node].sign=1; // LE
 
                 get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,
+                               in_namespace);
 
 //               get values for right child candidate node
                 temp_tree[current_node+1].val=uniquevals[j];
                 temp_tree[current_node+1].sign=2; // GT
 
                 get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,in_namespace);
 
 //               candidate splits with too few subjects are not useful
                 if ( (cands[0].n0 <= nmin2) || 
@@ -2884,7 +2901,7 @@ get_split2_cox_all(int current_node,
 
                 score=get_coxph_stat(current_node,n,nc,y,data,types,
                                      ncat,treat,censor,method,
-                                     temp_tree);
+                                     temp_tree,in_namespace);
 
                 if ( score > max ) {
 
@@ -2943,12 +2960,12 @@ get_split2_cox_all(int current_node,
 //               get values for left child candidate node
                 temp_tree[current_node].val=nom_lval;
                 get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,in_namespace);
 
 //               get values for right child candidate node
                 temp_tree[current_node+1].val=nom_rval;
                 get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,in_namespace);
 
 //               candidate splits with too few subjects are not useful
                 if ( (cands[0].n0 <= nmin2) || 
@@ -2961,7 +2978,7 @@ get_split2_cox_all(int current_node,
 
                 score=get_coxph_stat(current_node,n,nc,y,data,types,
                                      ncat,treat,censor,method,
-                                     temp_tree);
+                                     temp_tree,in_namespace);
 
                 if ( score > max ) {
 
@@ -3020,7 +3037,7 @@ get_split2_cox_all(int current_node,
                                            ncat[i],n_splits,&counter,
                                            cat_index,k_index,max,
                                            temp_tree,cands,
-                                           best_split);
+                                           best_split,in_namespace);
                 }
             }
         }
@@ -3052,7 +3069,8 @@ get_split2_mtry_surv(int current_node,
                      int nmin2,
                      int mtry,
                      int method,
-                     struct node *best_split)
+                     struct node *best_split,
+                     SEXP in_namespace)
 
 //  
 //  This function accepts as arguments the integer
@@ -3207,7 +3225,7 @@ get_split2_mtry_surv(int current_node,
             temp_tree[current_node].val=0;
 
             get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           get values for right child candidate node
             temp_tree[current_node+1].type=1;
@@ -3215,7 +3233,7 @@ get_split2_mtry_surv(int current_node,
             temp_tree[current_node+1].val=1;
 
             get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           candidate splits with too few subjects are not useful
             if ( (cands[0].n0 <= nmin2) || (cands[0].n1 <= nmin2) || 
@@ -3225,7 +3243,8 @@ get_split2_mtry_surv(int current_node,
             }
 
             score=get_coxph_stat(current_node,n,nc,y,data,types,
-                                 ncat,treat,censor,method,temp_tree);
+                                 ncat,treat,censor,method,temp_tree,
+                                 in_namespace);
 
             if ( score > max ) {
 
@@ -3271,14 +3290,14 @@ get_split2_mtry_surv(int current_node,
                 temp_tree[current_node].sign=1; // LE
 
                 get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,in_namespace);
 
 //               get values for right child candidate node
                 temp_tree[current_node+1].val=uniquevals[j];
                 temp_tree[current_node+1].sign=2; // GT
 
                 get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,in_namespace);
 
 //               candidate splits with too few subjects are not useful
                 if ( (cands[0].n0 <= nmin2) || 
@@ -3291,7 +3310,7 @@ get_split2_mtry_surv(int current_node,
 
                 score=get_coxph_stat(current_node,n,nc,y,data,types,
                                      ncat,treat,censor,method,
-                                     temp_tree);
+                                     temp_tree,in_namespace);
 
                 if ( score > max ) {
 
@@ -3350,12 +3369,12 @@ get_split2_mtry_surv(int current_node,
 //               get values for left child candidate node
                 temp_tree[current_node].val=nom_lval;
                 get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,in_namespace);
 
 //               get values for right child candidate node
                 temp_tree[current_node+1].val=nom_rval;
                 get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                               censor,method,temp_tree,cands);
+                               censor,method,temp_tree,cands,in_namespace);
 
 //               candidate splits with too few subjects are not useful
                 if ( (cands[0].n0 <= nmin2) || 
@@ -3368,7 +3387,7 @@ get_split2_mtry_surv(int current_node,
 
                 score=get_coxph_stat(current_node,n,nc,y,data,types,
                                      ncat,treat,censor,method,
-                                     temp_tree);
+                                     temp_tree,in_namespace);
 
                 if ( score > max ) {
 
@@ -3428,7 +3447,7 @@ get_split2_mtry_surv(int current_node,
                                            n_splits,&counter,
                                            cat_index,k_index,max,
                                            temp_tree,cands,
-                                           best_split);
+                                           best_split,in_namespace);
                 }
             }
         }
@@ -3460,7 +3479,8 @@ maketree_surv(int n,
               struct node *tree,
               int nmin,
               int maxdepth,
-              int method)
+              int method,
+              SEXP in_namespace)
 
 //
 //  This function returns a tree using the Cox PH
@@ -3496,7 +3516,7 @@ maketree_surv(int n,
 
         isplit=get_split2_cox_all(current_node,n,nc,y,data,types,
                                   ncat,treat,censor,tree,nmin,method,
-                                  best_split);
+                                  best_split,in_namespace);
 
         if ( isplit != -7 ) {  // "-7" = there should be no split
 
@@ -3547,7 +3567,7 @@ maketree_surv(int n,
 
 /*
 //   check
-    get_coxph_stat(1,n,nc,y,data,types,ncat,treat,censor,method,tree);
+    get_coxph_stat(1,n,nc,y,data,types,ncat,treat,censor,method,tree,in_namespace);
 */
 }
 
@@ -4110,7 +4130,8 @@ get_G_mc(int current_node,
          int *types,
          int *ncat,
          int *treat,
-         struct node *tree)
+         struct node *tree,
+         SEXP in_namespace)
 
 //
 //  This function calculates the "G" term in the depth
@@ -4166,7 +4187,7 @@ get_G_mc(int current_node,
 
 //   get regression model statistic (z^2)
     double stat=0;
-    stat=get_lmstat_mc(nsubj,lm_data);
+    stat=get_lmstat_mc(nsubj,lm_data,in_namespace);
 
 
     for ( i=0; i<nsubj; i++ ) free(lm_data[i]);
@@ -4387,7 +4408,8 @@ maketree2(int n,
           int mtry,
           int maxdepth2,
           int *index,
-          int method)
+          int method,
+          SEXP in_namespace)
 
 //
 //  This function returns a tree using the modified 
@@ -4531,7 +4553,8 @@ maketree2(int n,
 
                 tree[current_node-1].G=get_G_mc(current_node,n,nc,
                                                 boot_y,boot,types,
-                                                ncat,boot_treat,tree);
+                                                ncat,boot_treat,tree,
+                                                in_namespace);
             }
         }
 
@@ -4574,7 +4597,8 @@ maketree2_surv(int n,
                int mtry,
                int maxdepth2,
                int method,
-               int *index)
+               int *index,
+               SEXP in_namespace)
 
 //
 //  This function returns a tree for data with a
@@ -4653,14 +4677,14 @@ maketree2_surv(int n,
             isplit=get_split2_cox_all(current_node,n,nc,boot_y,boot,
                                       types,ncat,boot_treat,
                                       boot_censor,tree,nmin2,method,
-                                      best_split);
+                                      best_split,in_namespace);
 
         } else {  // if ( (method == 13) || (method == 21) )
 
             isplit=get_split2_mtry_surv(current_node,n,nc,boot_y,boot,
                                         types,ncat,boot_treat,
                                         boot_censor,tree,nmin2,mtry,
-                                        method,best_split);
+                                        method,best_split,in_namespace);
         }
 
         if ( isplit != -7 ) {  // "-7" = there should be no split
@@ -4748,7 +4772,8 @@ get_bestvar(int current_node,
             int mtry,
             int maxdepth2,
             int method,
-            int ncores)
+            int ncores,
+            SEXP in_namespace)
  
 //
 //  This function accepts as arguments a data set
@@ -4834,13 +4859,13 @@ get_bestvar(int current_node,
 
                 maketree2_surv(nsubj,nc,node_y,node_data,types,ncat,
                                node_treat,node_censor,tree2,nmin2,
-                               mtry,maxdepth2,method,index);
+                               mtry,maxdepth2,method,index,in_namespace);
 
             } else {              // continuous Y
 
                 maketree2(nsubj,nc,node_y,node_data,types,ncat,
                           node_treat,tree2,nmin2,mtry,maxdepth2,
-                          index,method);
+                          index,method,in_namespace);
             }
 
             get_varimp_replace(varimp00,nsubj,nc,node_y,
@@ -4927,7 +4952,8 @@ get_bestvar_surv(int current_node,
                  int mtry,
                  int maxdepth2,
                  int method,
-                 int ncores)
+                 int ncores,
+                 SEXP in_namespace)
  
 //
 //  This function accepts as arguments a data set
@@ -5004,7 +5030,7 @@ get_bestvar_surv(int current_node,
 
         maketree2_surv(nsubj,nc,node_y,node_data,types,ncat,
                        node_treat,node_censor,tree2,nmin2,
-                       mtry,maxdepth2,method,index);
+                       mtry,maxdepth2,method,index,in_namespace);
 
         get_varimp_replace(varimp00,nsubj,nc,node_y,
                            node_data,types,ncat,node_treat,
@@ -5036,7 +5062,7 @@ get_bestvar_surv(int current_node,
 
         maketree2_surv(nval,nc,node_y,node_data,types,ncat,
                        node_treat,node_censor,tree2,nmin2,
-                       mtry,maxdepth2,method,index);
+                       mtry,maxdepth2,method,index,in_namespace);
 
         get_varimp_replace(varimp00,nval,nc,node_y,
                            node_data,types,ncat,node_treat,
@@ -5120,7 +5146,8 @@ get_bestvar_mc(int current_node,
                int nmin2,
                int mtry,
                int maxdepth2,
-               int method)
+               int method,
+               SEXP in_namespace)
 
 //
 //  This function accepts as arguments a data set
@@ -5194,7 +5221,7 @@ get_bestvar_mc(int current_node,
 
         maketree2(nsubj,nc,node_y,node_data,types,ncat,
                   node_treat,tree2,nmin2,mtry,maxdepth2,
-                  index,method);
+                  index,method,in_namespace);
 
         get_varimp_replace(varimp00,nsubj,nc,node_y,
                            node_data,types,ncat,node_treat,
@@ -5281,7 +5308,8 @@ get_split(int current_node,
           int maxdepth2,
           int method,
           int ncores,
-          struct node *best_split)
+          struct node *best_split,
+          SEXP in_namespace)
 
 //
 //  This function accepts as arguments the integer
@@ -5309,13 +5337,13 @@ get_split(int current_node,
 
         bestvar=get_bestvar_mc(current_node,ntree,n,nc,y,data,types,
                                ncat,treat,censor,tree,nmin2,
-                               mtry,maxdepth2,method);
+                               mtry,maxdepth2,method,in_namespace);
 
     } else {
 
         bestvar=get_bestvar(current_node,ntree,n,nc,y,data,types,ncat,
                             treat,censor,tree,nmin2,mtry,
-                            maxdepth2,method,ncores);
+                            maxdepth2,method,ncores,in_namespace);
     }
 
     if ( bestvar == -7 ) return(-7);  // no bestvar, no best split
@@ -5641,7 +5669,8 @@ get_split_surv(int current_node,
                int maxdepth2,
                int method,
                int ncores,
-               struct node *best_split)
+               struct node *best_split,
+               SEXP in_namespace)
 
 //
 //  This function accepts as arguments the integer
@@ -5664,7 +5693,7 @@ get_split_surv(int current_node,
 //   get best variable
     int bestvar=get_bestvar_surv(current_node,ntree,n,nc,y,data,types,
                                  ncat,treat,censor,tree,nmin2,
-                                 mtry,maxdepth2,method,ncores);
+                                 mtry,maxdepth2,method,ncores,in_namespace);
 
 ////    Rprintf("bestvar=%d\n",bestvar);
 
@@ -5762,7 +5791,7 @@ get_split_surv(int current_node,
         temp_tree[current_node].val=0;
 
         get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                       censor,method,temp_tree,cands);
+                       censor,method,temp_tree,cands,in_namespace);
 
 //       get values for right child candidate node
         temp_tree[current_node+1].type=1;
@@ -5770,7 +5799,7 @@ get_split_surv(int current_node,
         temp_tree[current_node+1].val=1;
 
         get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                       censor,method,temp_tree,cands);
+                       censor,method,temp_tree,cands,in_namespace);
 
 //       candidate splits with too few subjects are not useful
         if ( (cands[0].n0 <= nmin) || (cands[0].n1 <= nmin) || 
@@ -5781,7 +5810,8 @@ get_split_surv(int current_node,
         }
 
         score=get_coxph_stat(current_node,n,nc,y,data,types,
-                             ncat,treat,censor,method,temp_tree);
+                             ncat,treat,censor,method,temp_tree,
+                             in_namespace);
 
         if ( score > max ) {
 
@@ -5824,14 +5854,14 @@ get_split_surv(int current_node,
             temp_tree[current_node].sign=1; // LE
 
             get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           get values for right child candidate node
             temp_tree[current_node+1].val=uniquevals[i];
             temp_tree[current_node+1].sign=2; // GT
 
             get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           candidate splits with too few subjects are not useful
             if ( (cands[0].n0 <= nmin) || (cands[0].n1 <= nmin) || 
@@ -5841,7 +5871,8 @@ get_split_surv(int current_node,
             }
 
             score=get_coxph_stat(current_node,n,nc,y,data,types,
-                                 ncat,treat,censor,method,temp_tree);
+                                 ncat,treat,censor,method,temp_tree,
+                                 in_namespace);
 
             if ( score > max ) {
 
@@ -5893,12 +5924,12 @@ get_split_surv(int current_node,
 //           get values for left child candidate node
             temp_tree[current_node].val=nom_lval;
             get_split0_cox(0,lll,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           get values for right child candidate node
             temp_tree[current_node+1].val=nom_rval;
             get_split0_cox(1,lll+1,n,nc,y,data,types,ncat,treat,
-                           censor,method,temp_tree,cands);
+                           censor,method,temp_tree,cands,in_namespace);
 
 //           candidate splits with too few subjects are not useful
             if ( (cands[0].n0 <= nmin) || 
@@ -5911,7 +5942,8 @@ get_split_surv(int current_node,
             }
 
             score=get_coxph_stat(current_node,n,nc,y,data,types,
-                                 ncat,treat,censor,method,temp_tree);
+                                 ncat,treat,censor,method,temp_tree,
+                                 in_namespace);
 
             if ( score > max ) {
 
@@ -5966,7 +5998,8 @@ get_split_surv(int current_node,
                                        temp,uniquevals,nunique,k,
                                        ncat[bestvar-1],n_splits,
                                        &counter,cat_index,k_index,max,
-                                       temp_tree,cands,best_split);
+                                       temp_tree,cands,best_split,
+                                       in_namespace);
             }
         }
     }
@@ -5994,7 +6027,8 @@ maketree(SEXP R_ntree,
          SEXP R_mtry,
          SEXP R_maxdepth,
          SEXP R_maxdepth2,
-         SEXP R_method)
+         SEXP R_method,
+         SEXP in_namespace)
 
 //
 //  This function accepts as arguments from R: 
@@ -6060,14 +6094,14 @@ maketree(SEXP R_ntree,
 
 {
 //   initialize objects from R into C
-    R_ntree=coerceVector(R_ntree,INTSXP);
-    R_n=coerceVector(R_n,INTSXP);
-    R_nc=coerceVector(R_nc,INTSXP);
-    R_nmin=coerceVector(R_nmin,INTSXP);
-    R_nmin2=coerceVector(R_nmin2,INTSXP);
-    R_mtry=coerceVector(R_mtry,INTSXP);
-    R_maxdepth=coerceVector(R_maxdepth,INTSXP);
-    R_method=coerceVector(R_method,INTSXP);
+    PROTECT(R_ntree=coerceVector(R_ntree,INTSXP));
+    PROTECT(R_n=coerceVector(R_n,INTSXP));
+    PROTECT(R_nc=coerceVector(R_nc,INTSXP));
+    PROTECT(R_nmin=coerceVector(R_nmin,INTSXP));
+    PROTECT(R_nmin2=coerceVector(R_nmin2,INTSXP));
+    PROTECT(R_mtry=coerceVector(R_mtry,INTSXP));
+    PROTECT(R_maxdepth=coerceVector(R_maxdepth,INTSXP));
+    PROTECT(R_method=coerceVector(R_method,INTSXP));
 
     int ntree=INTEGER(R_ntree)[0];
     int n=INTEGER(R_n)[0];
@@ -6091,6 +6125,8 @@ maketree(SEXP R_ntree,
         data[i]=&REAL(R_data)[i*nc];
     }
 
+    UNPROTECT(8);  // unprotect last 8 protected R objects
+
 //   initialize tree object
     struct node *tree=calloc(MAXSIZE,sizeof(struct node));
 
@@ -6099,7 +6135,7 @@ maketree(SEXP R_ntree,
                                                // 25: 2+ treatments
 
         maketree_surv(n,nc,y,data,types,ncat,treat,censor,tree,nmin,
-                      maxdepth,method);
+                      maxdepth,method,in_namespace);
 
         free(data);
 
@@ -6344,13 +6380,14 @@ maketree(SEXP R_ntree,
             isplit=get_split_surv(current_node,ntree,n,nc,y,data,
                                   types,ncat,treat,censor,
                                   tree,nmin,nmin2,mtry,maxdepth2,
-                                  method,ncores,best_split);
+                                  method,ncores,best_split,in_namespace);
 
         } else {
 
             isplit=get_split(current_node,ntree,n,nc,y,data,types,
                              ncat,treat,censor,tree,nmin,nmin2,
-                             mtry,maxdepth2,method,ncores,best_split);
+                             mtry,maxdepth2,method,ncores,best_split,
+                             in_namespace);
         }
 
         if ( isplit != -7 ) {  // "-7" = there should be no split

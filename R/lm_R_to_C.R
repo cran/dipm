@@ -31,10 +31,10 @@
 #'             method for right-censored survival outcomes. 
 #'             \emph{Biostatistics}.
 #'             
-#' @export
 #' @importFrom stats lm
 #' @importFrom utils capture.output
-#' 
+#' @noRd
+
 lm_R_to_C <- function(X) {
     
     old <- options()         

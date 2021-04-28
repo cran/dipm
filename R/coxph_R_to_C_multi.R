@@ -32,9 +32,9 @@
 #'             method for right-censored survival outcomes. 
 #'             \emph{Biostatistics}.
 #'             
-#' @export
 #' @importFrom survival coxph
 #' @importFrom utils capture.output
+#' @noRd
 
 coxph_R_to_C_multi <- function(X) {
     
@@ -50,7 +50,7 @@ coxph_R_to_C_multi <- function(X) {
     trts=unique(X[,3])
     ntrt=length(trts)
 
-    for ( i in 1:4 ) {
+    for ( i in 1:ntrt ) {
 
         if ( length( table(C[which(treatment==trts[i])]) ) == 1 ) {
 
