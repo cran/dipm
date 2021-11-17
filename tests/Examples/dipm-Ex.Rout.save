@@ -1,0 +1,718 @@
+
+R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "dipm"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> options(pager = "console")
+> base::assign(".ExTimings", "dipm-Ex.timings", pos = 'CheckExEnv')
+> base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+> base::assign(".format_ptime",
++ function(x) {
++   if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
++   if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
++   options(OutDec = '.')
++   format(x[1L:3L], digits = 7L)
++ },
++ pos = 'CheckExEnv')
+> 
+> ### * </HEADER>
+> library('dipm')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("dipm")
+> ### * dipm
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: dipm
+> ### Title: Depth Importance in Precision Medicine (DIPM)
+> ### Aliases: dipm
+> 
+> ### ** Examples
+> 
+> 
+> #
+> # ... an example with a continuous outcome variable
+> #     and two treatment groups
+> #
+> 
+> N = 100
+> set.seed(123)
+> 
+> # generate binary treatments
+> treatment = rbinom(N, 1, 0.5)
+> 
+> # generate candidate split variables
+> X1 = rnorm(n = N, mean = 0, sd = 1)
+> X2 = rnorm(n = N, mean = 0, sd = 1)
+> X3 = rnorm(n = N, mean = 0, sd = 1)
+> X4 = rnorm(n = N, mean = 0, sd = 1)
+> X5 = rnorm(n = N, mean = 0, sd = 1)
+> X = cbind(X1, X2, X3, X4, X5)
+> colnames(X) = paste0("X", 1:5)
+> 
+> # generate continuous outcome variable
+> calculateLink = function(X, treatment){
++ 
++     ((X[, 1] <= 0) & (X[, 2] <= 0)) *
++         (25 * (1 - treatment) + 8 * treatment) + 
++ 
++     ((X[, 1] <= 0) & (X[, 2] > 0)) *
++         (18 * (1 - treatment) + 20 * treatment) +
++ 
++     ((X[, 1] > 0) & (X[, 3] <= 0)) *
++         (20 * (1 - treatment) + 18 * treatment) + 
++ 
++     ((X[, 1] > 0) & (X[, 3] > 0)) *
++         (8 * (1 - treatment) + 25 * treatment)
++ }
+> 
+> Link = calculateLink(X, treatment)
+> Y = rnorm(N, mean = Link, sd = 1)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, treatment)
+> 
+> # fit a dipm classification tree 
+> tree1 = dipm(Y ~ treatment | ., data, mtry = 1, maxdepth = 3)
+Note that all candidate split variables are assumed to be ordinal.
+DIPM Tree (Continuous Y, 2 treatments, yes mtry, ntree=100):
+ node splitvar splitvar_name type    splitval lchild rchild depth nsubj besttrt
+    1        1            X1  ord  0.05300423      2      3     1   100       0
+    2        2            X2  ord -0.10097489      4      5     2    56       0
+    3        3            X3  ord -0.06082195      6      7     2    44       1
+    4       NA          <NA> <NA>          NA     NA     NA     3    32       0
+    5       NA          <NA> <NA>          NA     NA     NA     3    24       1
+    6       NA          <NA> <NA>          NA     NA     NA     3    20       0
+    7       NA          <NA> <NA>          NA     NA     NA     3    24       1
+> # predict optimal treatment for new subjects
+> predict(tree1, newdata = head(data), 
++ FUN = function(n)  as.numeric(n$info$opt_trt))
+1 2 3 4 5 6 
+0 1 1 1 0 0 
+> 
+> ## No test: 
+> #
+> # ... an example with a continuous outcome variable
+> #     and three treatment groups
+> #
+> 
+> N = 600
+> set.seed(123)
+> 
+> # generate treatments
+> treatment = sample(1:3, N, replace = TRUE)
+> 
+> # generate candidate split variables
+> X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X3 = sample(1:4, N, replace = TRUE)
+> X4 = sample(1:5, N, replace = TRUE)
+> X5 = rbinom(N, 1, 0.5)
+> X6 = rbinom(N, 1, 0.5)
+> X7 = rbinom(N, 1, 0.5)
+> X = cbind(X1, X2, X3, X4, X5, X6, X7)
+> colnames(X) = paste0("X", 1:7)
+> 
+> # generate continuous outcome variable
+> calculateLink = function(X,treatment){
++ 
++     10.2 - 0.3 * (treatment == 1) - 0.1 * X[, 1] + 
++     2.1 * (treatment == 1) * X[, 1] +
++     1.2 * X[, 2]
++ }
+> 
+> Link = calculateLink(X, treatment)
+> Y = rnorm(N, mean = Link, sd = 1)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, treatment)
+> 
+> # create vector of variable types
+> types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
++         "response", "treatment")
+> 
+> # fit a dipm classification tree 
+> tree2 = dipm(Y ~ treatment | ., data, types = types, maxdepth = 2)
+DIPM Tree (Continuous Y, 2+ treatments, no mtry, ntree=25):
+ node splitvar splitvar_name type splitval lchild rchild depth nsubj besttrt
+    1        1            X1  ord   0.1464      2      3     1   600       2
+    2       NA          <NA> <NA>       NA     NA     NA     2   325       3
+    3       NA          <NA> <NA>       NA     NA     NA     2   275       1
+> 
+> #
+> # ... an example with a survival outcome variable
+> #     and two treatment groups
+> #
+> 
+> N = 300
+> set.seed(321)
+> 
+> # generate binary treatments
+> treatment = rbinom(N, 1, 0.5)
+> 
+> # generate candidate split variables
+> X1 = rnorm(n = N, mean = 0, sd = 1)
+> X2 = rnorm(n = N, mean = 0, sd = 1)
+> X3 = rnorm(n = N, mean = 0, sd = 1)
+> X4 = rnorm(n = N, mean = 0, sd = 1)
+> X5 = rnorm(n = N, mean = 0, sd = 1)
+> X = cbind(X1, X2, X3, X4, X5)
+> colnames(X) = paste0("X", 1:5)
+> 
+> # generate survival outcome variable
+> calculateLink = function(X, treatment){
++ 
++     X[, 1] + 0.5 * X[, 3] + (3 * treatment - 1.5) * (abs(X[, 5]) - 0.67)
++ }
+> 
+> Link = calculateLink(X, treatment)
+> T = rexp(N, exp(-Link))
+> C0 = rexp(N, 0.1 * exp(X[, 5] + X[, 2]))
+> Y = pmin(T, C0)
+> C = (T <= C0)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, C, treatment)
+> 
+> # fit a dipm classification tree 
+> tree3 = dipm(Surv(Y, C) ~ treatment | .,data, ntree = 1, maxdepth = 2,
++            maxdepth2 = 6)
+Note that all candidate split variables are assumed to be ordinal.
+DIPM Tree (Survival Y, 2 treatments, no mtry, ntree=1):
+ node splitvar splitvar_name type   splitval lchild rchild depth nsubj besttrt
+    1        5            X5  ord -0.8333296      2      3     1   300       1
+    2       NA          <NA> <NA>         NA     NA     NA     2    63       1
+    3       NA          <NA> <NA>         NA     NA     NA     2   237       0
+> 
+> #
+> # ... an example with a survival outcome variable
+> #     and four treatment groups
+> #
+> 
+> N = 800
+> set.seed(321)
+> 
+> # generate treatments
+> treatment = sample(1:4, N, replace = TRUE)
+> 
+> # generate candidate split variables
+> X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X3 = sample(1:4, N, replace = TRUE)
+> X4 = sample(1:5, N, replace = TRUE)
+> X5 = rbinom(N, 1, 0.5)
+> X6 = rbinom(N, 1, 0.5)
+> X7 = rbinom(N, 1, 0.5)
+> X = cbind(X1, X2, X3, X4, X5, X6, X7)
+> colnames(X) = paste0("X", 1:7)
+> 
+> # generate survival outcome variable
+> calculateLink = function(X, treatment, noise){
++ 
++     -0.2 * (treatment == 1) +
++     -1.1 * X[, 1] + 
++     1.2 * (treatment == 1) * X[, 1] +
++     1.2 * X[, 2]
++ }
+> 
+> Link = calculateLink(X, treatment)
+> T = rweibull(N, shape=2, scale = exp(Link))
+> Cnoise = runif(n = N) + runif(n = N)
+> C0 = rexp(N, exp(0.3 * -Cnoise))
+> Y = pmin(T, C0)
+> C = (T <= C0)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, C, treatment)
+> 
+> # create vector of variable types
+> types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3), 
++         "response", "C", "treatment")
+> 
+> # fit two dipm classification trees 
+> tree4 = dipm(Surv(Y, C) ~ treatment | ., data, types = types, ntree = 1, 
++            maxdepth = 2, maxdepth2 = 6)
+DIPM Tree (Survival Y, 2+ treatments, no mtry, ntree=1):
+ node splitvar splitvar_name type splitval lchild rchild depth nsubj besttrt
+    1        1            X1  ord   0.4154      2      3     1   800       4
+    2       NA          <NA> <NA>       NA     NA     NA     2   524       3
+    3       NA          <NA> <NA>       NA     NA     NA     2   276       1
+> tree5 = dipm(Surv(Y, C) ~ treatment | X3 + X4, data, types = types, ntree = 1, 
++            maxdepth = 2, maxdepth2 = 6)
+DIPM Tree (Survival Y, 2+ treatments, no mtry, ntree=1):
+ node splitvar splitvar_name type splitval lchild rchild depth nsubj besttrt
+    1        4            X4  nom    {2,5}      2      3     1   800       4
+    2       NA          <NA> <NA>     <NA>     NA     NA     2   330       3
+    3       NA          <NA> <NA>     <NA>     NA     NA     2   470       4
+> ## End(No test)
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("dipm", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("node_dipm")
+> ### * node_dipm
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: node_dipm
+> ### Title: Panel-Generator for Visualization of A Precision Medicine Tree
+> ### Aliases: node_dipm
+> 
+> ### ** Examples
+> 
+> 
+> #' #
+> # ... an example with a continuous outcome variable
+> #     and two treatment groups
+> #
+> 
+> N = 100
+> set.seed(123)
+> 
+> # generate binary treatments
+> treatment = rbinom(N, 1, 0.5)
+> 
+> # generate candidate split variables
+> X1 = rnorm(n = N, mean = 0, sd = 1)
+> X2 = rnorm(n = N, mean = 0, sd = 1)
+> X3 = rnorm(n = N, mean = 0, sd = 1)
+> X4 = rnorm(n = N, mean = 0, sd = 1)
+> X5 = rnorm(n = N, mean = 0, sd = 1)
+> X = cbind(X1, X2, X3, X4, X5)
+> colnames(X) = paste0("X", 1:5)
+> 
+> # generate continuous outcome variable
+> calculateLink = function(X, treatment){
++ 
++     ((X[, 1] <= 0) & (X[, 2] <= 0)) *
++         (25 * (1 - treatment) + 8 * treatment) + 
++ 
++     ((X[, 1] <= 0) & (X[, 2] > 0)) *
++         (18 * (1 - treatment) + 20 * treatment) +
++ 
++     ((X[,1 ] > 0) & (X[, 3] <= 0)) *
++         (20 * (1 - treatment) + 18 * treatment) + 
++ 
++     ((X[,1] > 0) & (X[,3] > 0)) *
++         (8 * (1 - treatment) + 25 * treatment)
++ }
+> 
+> Link = calculateLink(X, treatment)
+> Y = rnorm(N, mean = Link, sd = 1)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, treatment)
+> 
+> # fit a dipm classification tree
+> tree = dipm(Y ~ treatment | ., data, mtry = 1, maxdepth = 3) 
+Note that all candidate split variables are assumed to be ordinal.
+DIPM Tree (Continuous Y, 2 treatments, yes mtry, ntree=100):
+ node splitvar splitvar_name type    splitval lchild rchild depth nsubj besttrt
+    1        1            X1  ord  0.05300423      2      3     1   100       0
+    2        2            X2  ord -0.10097489      4      5     2    56       0
+    3        3            X3  ord -0.06082195      6      7     2    44       1
+    4       NA          <NA> <NA>          NA     NA     NA     3    32       0
+    5       NA          <NA> <NA>          NA     NA     NA     3    24       1
+    6       NA          <NA> <NA>          NA     NA     NA     3    20       0
+    7       NA          <NA> <NA>          NA     NA     NA     3    24       1
+> plot(tree, terminal_panel = node_dipm)
+>             
+> 
+>                                     
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("node_dipm", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("pmprune")
+> ### * pmprune
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: pmprune
+> ### Title: Pruning A Precision Medicine Tree
+> ### Aliases: pmprune
+> 
+> ### ** Examples
+> 
+> 
+> #
+> # ... an example with a continuous outcome variable
+> #     and three treatment groups
+> #
+> 
+> ## No test: 
+> N = 100
+> set.seed(123)
+> 
+> # generate treatments
+> treatment = sample(1:3, N, replace = TRUE)
+> 
+> # generate candidate split variables
+> X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X3 = sample(1:4, N, replace = TRUE)
+> X4 = sample(1:5, N, replace = TRUE)
+> X5 = rbinom(N, 1, 0.5)
+> X6 = rbinom(N, 1, 0.5)
+> X7 = rbinom(N, 1, 0.5)
+> X = cbind(X1, X2, X3, X4, X5, X6, X7)
+> colnames(X) = paste0("X", 1:7)
+> 
+> # generate continuous outcome variable
+> calculateLink = function(X, treatment){
++ 
++     10.2 - 0.3 * (treatment == 1) - 0.1 * X[, 1] + 
++     2.1 * (treatment == 1) * X[, 1] +
++     1.2 * X[, 2]
++ }
+> 
+> Link = calculateLink(X, treatment)
+> Y = rnorm(N, mean = Link, sd = 1)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, treatment)
+> 
+> # create vector of variable types
+> types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
++             "response", "treatment")
+> 
+> # fit a classification tree
+> tree = spmtree(Y ~ treatment | ., data, types = types, dataframe = TRUE)
+SPM Tree (Continuous Y, 2+ treatments):
+ node splitvar splitvar_name type splitval lchild rchild depth nsubj besttrt
+    1        1            X1  ord  -0.7849      2      3     1   100       2
+    2       NA          <NA> <NA>       NA     NA     NA     2    23       3
+    3        1            X1  ord   0.1813      4      5     2    77       2
+    4       NA          <NA> <NA>       NA     NA     NA     3    38       2
+    5       NA          <NA> <NA>       NA     NA     NA     3    39       1
+> 
+> # prune the tree
+> ptree = pmprune(tree)
+> ## End(No test)
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("pmprune", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("spmtree")
+> ### * spmtree
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: spmtree
+> ### Title: Simple Precision Medicine Tree
+> ### Aliases: spmtree
+> 
+> ### ** Examples
+> 
+> 
+> #
+> # ... an example with a continuous outcome variable
+> #     and two treatment groups
+> #
+> 
+> N = 300
+> set.seed(123)
+> 
+> # generate binary treatments
+> treatment = rbinom(N, 1, 0.5)
+> 
+> # generate candidate split variables
+> X1 = rnorm(n = N, mean = 0, sd = 1)
+> X2 = rnorm(n = N, mean = 0, sd = 1)
+> X3 = rnorm(n = N, mean = 0, sd = 1)
+> X4 = rnorm(n = N, mean = 0, sd = 1)
+> X5 = rnorm(n = N, mean = 0, sd = 1)
+> X = cbind(X1, X2, X3, X4, X5)
+> colnames(X) = paste0("X", 1:5)
+> 
+> # generate continuous outcome variable
+> calculateLink = function(X, treatment){
++ 
++     ((X[, 1] <= 0) & (X[, 2] <= 0)) *
++         (25 * (1 - treatment) + 8 * treatment) + 
++ 
++     ((X[, 1] <= 0) & (X[, 2] > 0)) *
++         (18 * (1 - treatment) + 20 * treatment) +
++ 
++     ((X[, 1] > 0) & (X[, 3] <= 0)) *
++         (20 * (1 - treatment) + 18 * treatment) + 
++ 
++     ((X[, 1] > 0) & (X[, 3] > 0)) *
++         (8 * (1 - treatment) + 25 * treatment)
++ }
+> 
+> Link = calculateLink(X, treatment)
+> Y = rnorm(N, mean = Link, sd = 1)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, treatment)
+> 
+> # fit a classification tree
+> tree1 = spmtree(Y ~ treatment | ., data, maxdepth = 3)
+Note that all candidate split variables are assumed to be ordinal.
+SPM Tree (Continuous Y, 2 treatments):
+ node splitvar splitvar_name type     splitval lchild rchild depth nsubj
+    1        1            X1  ord -0.014307413      2      3     1   300
+    2        2            X2  ord -0.016002527      4      5     2   148
+    3        3            X3  ord -0.004060653      6      7     2   152
+    4       NA          <NA> <NA>           NA     NA     NA     3    68
+    5       NA          <NA> <NA>           NA     NA     NA     3    80
+    6       NA          <NA> <NA>           NA     NA     NA     3    71
+    7       NA          <NA> <NA>           NA     NA     NA     3    81
+ besttrt
+       1
+       0
+       1
+       0
+       1
+       0
+       1
+> # predict optimal treatment for new subjects
+> predict(tree1, newdata = head(data), 
++ FUN = function(n)  as.numeric(n$info$opt_trt))
+1 2 3 4 5 6 
+1 0 1 1 1 0 
+> 
+> ## No test: 
+> #
+> # ... an example with a continuous outcome variable
+> #     and three treatment groups
+> #
+> 
+> N = 600
+> set.seed(123)
+> 
+> # generate treatments
+> treatment = sample(1:3, N, replace = TRUE)
+> 
+> # generate candidate split variables
+> X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X3 = sample(1:4, N, replace = TRUE)
+> X4 = sample(1:5, N, replace = TRUE)
+> X5 = rbinom(N, 1, 0.5)
+> X6 = rbinom(N, 1, 0.5)
+> X7 = rbinom(N, 1, 0.5)
+> X = cbind(X1, X2, X3, X4, X5, X6, X7)
+> colnames(X) = paste0("X", 1:7)
+> 
+> # generate continuous outcome variable
+> calculateLink = function(X, treatment){
++ 
++     10.2 - 0.3 * (treatment == 1) - 0.1 * X[, 1] + 
++     2.1 * (treatment == 1) * X[, 1] +
++     1.2 * X[, 2]
++ }
+> 
+> Link = calculateLink(X, treatment)
+> Y = rnorm(N, mean = Link, sd = 1)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, treatment)
+> 
+> # create vector of variable types
+> types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
++         "response", "treatment")
+> 
+> # fit a classification tree
+> tree2 = spmtree(Y ~ treatment | ., data, types = types)
+SPM Tree (Continuous Y, 2+ treatments):
+ node splitvar splitvar_name type splitval lchild rchild depth nsubj besttrt
+    1        1            X1  ord   0.1464      2      3     1   600       2
+    2        1            X1  ord  -0.6868      4      5     2   325       3
+    3        1            X1  ord   1.5466      6      7     2   275       1
+    4        2            X2  ord   0.6069      8      9     3   145       2
+    5        1            X1  ord   0.0261     10     11     3   180       3
+    6        5            X5  bin   0.0000     12     13     3   237       1
+    7       NA          <NA> <NA>       NA     NA     NA     3    38       1
+    8        2            X2  ord   0.1638     14     15     4   105       2
+    9       NA          <NA> <NA>       NA     NA     NA     4    40       3
+   10        1            X1  ord  -0.3498     16     17     4   154       3
+   11       NA          <NA> <NA>       NA     NA     NA     4    26       3
+   12        1            X1  ord   0.3711     18     19     4   118       1
+   13        2            X2  ord   0.6302     20     21     4   119       1
+   14        2            X2  ord  -0.1625     22     23     5    83       2
+   15       NA          <NA> <NA>       NA     NA     NA     5    22       2
+   16        7            X7  bin   0.0000     24     25     5    57       3
+   17        2            X2  ord   0.4425     26     27     5    97       3
+   18       NA          <NA> <NA>       NA     NA     NA     5    29       1
+   19        6            X6  bin   0.0000     28     29     5    89       1
+   20        6            X6  bin   0.0000     30     31     5    83       1
+   21       NA          <NA> <NA>       NA     NA     NA     5    36       1
+   22        6            X6  bin   0.0000     32     33     6    58       2
+   23       NA          <NA> <NA>       NA     NA     NA     6    25       3
+   24       NA          <NA> <NA>       NA     NA     NA     6    33       3
+   25       NA          <NA> <NA>       NA     NA     NA     6    24       2
+   26        1            X1  ord  -0.1973     34     35     6    73       3
+   27       NA          <NA> <NA>       NA     NA     NA     6    24       3
+   28        1            X1  ord   0.7511     36     37     6    44       1
+   29        2            X2  ord   0.2856     38     39     6    45       1
+   30        2            X2  ord  -0.1898     40     41     6    42       1
+   31       NA          <NA> <NA>       NA     NA     NA     6    41       1
+   32       NA          <NA> <NA>       NA     NA     NA     7    27       2
+   33       NA          <NA> <NA>       NA     NA     NA     7    31       2
+   34       NA          <NA> <NA>       NA     NA     NA     7    28       3
+   35       NA          <NA> <NA>       NA     NA     NA     7    45       2
+   36       NA          <NA> <NA>       NA     NA     NA     7    19       1
+   37       NA          <NA> <NA>       NA     NA     NA     7    25       1
+   38       NA          <NA> <NA>       NA     NA     NA     7    24       1
+   39       NA          <NA> <NA>       NA     NA     NA     7    21       1
+   40       NA          <NA> <NA>       NA     NA     NA     7    21       1
+   41       NA          <NA> <NA>       NA     NA     NA     7    21       1
+> 
+> #
+> # ... an example with a survival outcome variable
+> #     and two treatment groups
+> #
+> 
+> N = 300
+> set.seed(321)
+> 
+> # generate binary treatments
+> treatment = rbinom(N, 1, 0.5)
+> 
+> # generate candidate split variables
+> X1 = rnorm(n = N, mean = 0, sd = 1)
+> X2 = rnorm(n = N, mean = 0, sd = 1)
+> X3 = rnorm(n = N, mean = 0, sd = 1)
+> X4 = rnorm(n = N, mean = 0, sd = 1)
+> X5 = rnorm(n = N, mean = 0, sd = 1)
+> X = cbind(X1, X2, X3, X4, X5)
+> colnames(X) = paste0("X", 1:5)
+> 
+> # generate survival outcome variable
+> calculateLink = function(X, treatment){
++ 
++     X[, 1] + 0.5 * X[, 3] + (3 * treatment - 1.5) * (abs(X[, 5]) - 0.67)
++ }
+> 
+> Link = calculateLink(X, treatment)
+> T = rexp(N, exp(-Link))
+> C0 = rexp(N, 0.1 * exp(X[, 5] + X[, 2]))
+> Y = pmin(T, C0)
+> C = (T <= C0)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, C, treatment)
+> 
+> # fit a classification tree
+> tree3 = spmtree(Surv(Y, C) ~ treatment | ., data, maxdepth = 2)
+Note that all candidate split variables are assumed to be ordinal.
+SPM Tree (Survival Y, 2 treatments):
+ node splitvar splitvar_name type   splitval lchild rchild depth nsubj besttrt
+    1        5            X5  ord -0.8333296      2      3     1   300       1
+    2       NA          <NA> <NA>         NA     NA     NA     2    63       1
+    3       NA          <NA> <NA>         NA     NA     NA     2   237       0
+> 
+> #
+> # ... an example with a survival outcome variable
+> #     and four treatment groups
+> #
+> 
+> N = 800
+> set.seed(321)
+> 
+> # generate treatments
+> treatment = sample(1:4, N, replace = TRUE)
+> 
+> # generate candidate split variables
+> X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+> X3 = sample(1:4, N, replace = TRUE)
+> X4 = sample(1:5, N, replace = TRUE)
+> X5 = rbinom(N, 1, 0.5)
+> X6 = rbinom(N, 1, 0.5)
+> X7 = rbinom(N, 1, 0.5)
+> X = cbind(X1, X2, X3, X4, X5, X6, X7)
+> colnames(X) = paste0("X", 1:7)
+> 
+> # generate survival outcome variable
+> calculateLink = function(X, treatment, noise){
++ 
++     -0.2 * (treatment == 1) +
++     -1.1 * X[, 1] + 
++     1.2 * (treatment == 1) * X[, 1] +
++     1.2 * X[, 2]
++ }
+> 
+> Link = calculateLink(X, treatment)
+> T = rweibull(N, shape = 2, scale = exp(Link))
+> Cnoise = runif(n = N) + runif(n = N)
+> C0 = rexp(N, exp(0.3 * -Cnoise))
+> Y = pmin(T, C0)
+> C = (T <= C0)
+> 
+> # combine variables in a data frame
+> data = data.frame(X, Y, C, treatment)
+> 
+> # create vector of variable types
+> types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
++         "response", "C", "treatment")
+> 
+> # fit two classification trees
+> tree4 = spmtree(Surv(Y, C) ~ treatment | ., data, types = types, maxdepth = 2)
+SPM Tree (Survival Y, 2+ treatments):
+ node splitvar splitvar_name type splitval lchild rchild depth nsubj besttrt
+    1        1            X1  ord   0.4154      2      3     1   800       4
+    2       NA          <NA> <NA>       NA     NA     NA     2   524       3
+    3       NA          <NA> <NA>       NA     NA     NA     2   276       1
+> tree5 = spmtree(Surv(Y, C) ~ treatment | X3 + X4, data, types = types,
++              maxdepth = 2)
+SPM Tree (Survival Y, 2+ treatments):
+ node splitvar splitvar_name type splitval lchild rchild depth nsubj besttrt
+    1        4            X4  nom    {2,5}      2      3     1   800       4
+    2       NA          <NA> <NA>     <NA>     NA     NA     2   330       3
+    3       NA          <NA> <NA>     <NA>     NA     NA     2   470       4
+> ## End(No test)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("spmtree", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  119.37 0.65 121.28 NA NA 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')

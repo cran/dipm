@@ -17,7 +17,9 @@ No return value, called for plot
 }
 \description{
 This function provides a new plot method for \code{dipm}
- and \code{spmtree}.
+ and \code{spmtree}. It visualizes stratified treatment groups through 
+ boxplots for a continuous outcome and survival plots for a survival outcome, 
+ respectively.
 }
 \details{
 This function visualizes the precision medicine trees
@@ -30,45 +32,45 @@ This function visualizes the precision medicine trees
 #     and two treatment groups
 #
 
-N=100
+N = 100
 set.seed(123)
 
 # generate binary treatments
-treatment=rbinom(N,1,0.5)
+treatment = rbinom(N, 1, 0.5)
 
 # generate candidate split variables
-X1=rnorm(n=N,mean=0,sd=1)
-X2=rnorm(n=N,mean=0,sd=1)
-X3=rnorm(n=N,mean=0,sd=1)
-X4=rnorm(n=N,mean=0,sd=1)
-X5=rnorm(n=N,mean=0,sd=1)
-X=cbind(X1,X2,X3,X4,X5)
-colnames(X)=paste0("X",1:5)
+X1 = rnorm(n = N, mean = 0, sd = 1)
+X2 = rnorm(n = N, mean = 0, sd = 1)
+X3 = rnorm(n = N, mean = 0, sd = 1)
+X4 = rnorm(n = N, mean = 0, sd = 1)
+X5 = rnorm(n = N, mean = 0, sd = 1)
+X = cbind(X1, X2, X3, X4, X5)
+colnames(X) = paste0("X", 1:5)
 
 # generate continuous outcome variable
-calculateLink <- function(X,treatment) {
+calculateLink = function(X, treatment){
 
-    ( (X[,1] <= 0) & (X[,2] <= 0) )*
-        ( 25*(1-treatment) + 8*treatment) + 
+    ((X[, 1] <= 0) & (X[, 2] <= 0)) *
+        (25 * (1 - treatment) + 8 * treatment) + 
 
-    ( (X[,1] <= 0) & (X[,2] > 0) )*
-        ( 18*(1-treatment) + 20*treatment ) +
+    ((X[, 1] <= 0) & (X[, 2] > 0)) *
+        (18 * (1 - treatment) + 20 * treatment) +
 
-    ( (X[,1] > 0) & (X[,3] <= 0) )*
-        ( 20*(1-treatment) + 18*treatment ) + 
+    ((X[,1 ] > 0) & (X[, 3] <= 0)) *
+        (20 * (1 - treatment) + 18 * treatment) + 
 
-    ( (X[,1] > 0) & (X[,3] > 0) )*
-        ( 8*(1-treatment) + 25*treatment )
+    ((X[,1] > 0) & (X[,3] > 0)) *
+        (8 * (1 - treatment) + 25 * treatment)
 }
 
-Link=calculateLink(X,treatment)
-Y=rnorm(N,mean=Link,sd=1)
+Link = calculateLink(X, treatment)
+Y = rnorm(N, mean = Link, sd = 1)
 
 # combine variables in a data frame
-data=data.frame(X,Y,treatment)
+data = data.frame(X, Y, treatment)
 
 # fit a dipm classification tree
-tree=dipm(Y~treatment | .,data,mtry=1,maxdepth=3) 
+tree = dipm(Y ~ treatment | ., data, mtry = 1, maxdepth = 3) 
 plot(tree, terminal_panel = node_dipm)
             
 

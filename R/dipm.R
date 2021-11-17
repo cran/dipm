@@ -8,7 +8,7 @@
 #' @param formula A description of the model to be fit with format
 #'                \code{Y ~ treatment | X1 + X2} for data with a
 #'                continuous outcome variable Y and 
-#'                \code{Surv(Y,C) ~ treatment | X1 + X2} for data with
+#'                \code{Surv(Y, C) ~ treatment | X1 + X2} for data with
 #'                a right-censored survival outcome variable Y and
 #'                a censoring indicator C
 #' @param data A matrix or data frame of the data
@@ -30,16 +30,16 @@
 #' @param ntree An integer specifying the number of embedded trees
 #'              to construct at each node of the overall 
 #'              classification tree; if left blank, the default value
-#'              of \code{ceiling(min(max(sqrt(n),sqrt(nc)),1000))}
-#'              will be used if \code{mtry=0} below and 
-#'              \code{ceiling(min(max(n,nc),1000))} otherwise; 
+#'              of \code{ceiling(min(max(sqrt(n), sqrt(nc)), 1000))}
+#'              will be used if \code{mtry = Inf} below and 
+#'              \code{ceiling(min(max(n, nc), 1000))} otherwise; 
 #'              \code{n} is the total sample size of the data, and
 #'              \code{nc} is the total number of candidate split
 #'              variables
 #' @param mtry An integer specifying the number of candidate split
 #'             variables to randomly select at each node of 
 #'             embedded trees; if \code{mtry} is set equal to the
-#'             default value of 0, then all possible splits of all
+#'             default value of Inf, then all possible splits of all
 #'             candidate split variables are considered at the nodes
 #'             of the embedded trees; otherwise, a recommended value
 #'             of \code{mtry} to use is the square root of the total
@@ -213,47 +213,47 @@
 #' #     and two treatment groups
 #' #
 #'
-#' N=100
+#' N = 100
 #' set.seed(123)
 #'
 #' # generate binary treatments
-#' treatment=rbinom(N,1,0.5)
+#' treatment = rbinom(N, 1, 0.5)
 #'
 #' # generate candidate split variables
-#' X1=rnorm(n=N,mean=0,sd=1)
-#' X2=rnorm(n=N,mean=0,sd=1)
-#' X3=rnorm(n=N,mean=0,sd=1)
-#' X4=rnorm(n=N,mean=0,sd=1)
-#' X5=rnorm(n=N,mean=0,sd=1)
-#' X=cbind(X1,X2,X3,X4,X5)
-#' colnames(X)=paste0("X",1:5)
+#' X1 = rnorm(n = N, mean = 0, sd = 1)
+#' X2 = rnorm(n = N, mean = 0, sd = 1)
+#' X3 = rnorm(n = N, mean = 0, sd = 1)
+#' X4 = rnorm(n = N, mean = 0, sd = 1)
+#' X5 = rnorm(n = N, mean = 0, sd = 1)
+#' X = cbind(X1, X2, X3, X4, X5)
+#' colnames(X) = paste0("X", 1:5)
 #'
 #' # generate continuous outcome variable
-#' calculateLink <- function(X,treatment) {
+#' calculateLink = function(X, treatment){
 #'
-#'     ( (X[,1] <= 0) & (X[,2] <= 0) )*
-#'         ( 25*(1-treatment) + 8*treatment) + 
+#'     ((X[, 1] <= 0) & (X[, 2] <= 0)) *
+#'         (25 * (1 - treatment) + 8 * treatment) + 
 #'
-#'     ( (X[,1] <= 0) & (X[,2] > 0) )*
-#'         ( 18*(1-treatment) + 20*treatment ) +
+#'     ((X[, 1] <= 0) & (X[, 2] > 0)) *
+#'         (18 * (1 - treatment) + 20 * treatment) +
 #'
-#'     ( (X[,1] > 0) & (X[,3] <= 0) )*
-#'         ( 20*(1-treatment) + 18*treatment ) + 
+#'     ((X[, 1] > 0) & (X[, 3] <= 0)) *
+#'         (20 * (1 - treatment) + 18 * treatment) + 
 #'
-#'     ( (X[,1] > 0) & (X[,3] > 0) )*
-#'         ( 8*(1-treatment) + 25*treatment )
+#'     ((X[, 1] > 0) & (X[, 3] > 0)) *
+#'         (8 * (1 - treatment) + 25 * treatment)
 #' }
 #'
-#' Link=calculateLink(X,treatment)
-#' Y=rnorm(N,mean=Link,sd=1)
+#' Link = calculateLink(X, treatment)
+#' Y = rnorm(N, mean = Link, sd = 1)
 #'
 #' # combine variables in a data frame
-#' data=data.frame(X,Y,treatment)
+#' data = data.frame(X, Y, treatment)
 #' 
 #' # fit a dipm classification tree 
-#' tree1=dipm(Y~treatment | .,data,mtry=1,maxdepth=3)
+#' tree1 = dipm(Y ~ treatment | ., data, mtry = 1, maxdepth = 3)
 #' # predict optimal treatment for new subjects
-#' predict(tree1, newdata=head(data), 
+#' predict(tree1, newdata = head(data), 
 #' FUN = function(n)  as.numeric(n$info$opt_trt))
 #'
 #'\donttest{
@@ -262,133 +262,133 @@
 #' #     and three treatment groups
 #' #
 #' 
-#' N=600
+#' N = 600
 #' set.seed(123)
 #' 
 #' # generate treatments
-#' treatment=sample(1:3,N,replace=TRUE)
+#' treatment = sample(1:3, N, replace = TRUE)
 #' 
 #' # generate candidate split variables
-#' X1=round(rnorm(n=N,mean=0,sd=1),4)
-#' X2=round(rnorm(n=N,mean=0,sd=1),4)
-#' X3=sample(1:4,N,replace=TRUE)
-#' X4=sample(1:5,N,replace=TRUE)
-#' X5=rbinom(N,1,0.5)
-#' X6=rbinom(N,1,0.5)
-#' X7=rbinom(N,1,0.5)
-#' X=cbind(X1,X2,X3,X4,X5,X6,X7)
-#' colnames(X)=paste0("X",1:7)
+#' X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+#' X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+#' X3 = sample(1:4, N, replace = TRUE)
+#' X4 = sample(1:5, N, replace = TRUE)
+#' X5 = rbinom(N, 1, 0.5)
+#' X6 = rbinom(N, 1, 0.5)
+#' X7 = rbinom(N, 1, 0.5)
+#' X = cbind(X1, X2, X3, X4, X5, X6, X7)
+#' colnames(X) = paste0("X", 1:7)
 #' 
 #' # generate continuous outcome variable
-#' calculateLink<-function(X,treatment){
+#' calculateLink = function(X,treatment){
 #' 
-#'     10.2 - 0.3*( treatment == 1 ) - 0.1*X[,1] + 
-#'     2.1*( treatment == 1 )*X[,1] +
-#'     1.2*X[,2]
+#'     10.2 - 0.3 * (treatment == 1) - 0.1 * X[, 1] + 
+#'     2.1 * (treatment == 1) * X[, 1] +
+#'     1.2 * X[, 2]
 #' }
 #' 
-#' Link=calculateLink(X,treatment)
-#' Y=rnorm(N,mean=Link,sd=1)
+#' Link = calculateLink(X, treatment)
+#' Y = rnorm(N, mean = Link, sd = 1)
 #' 
 #' # combine variables in a data frame
-#' data=data.frame(X,Y,treatment)
+#' data = data.frame(X, Y, treatment)
 #' 
 #' # create vector of variable types
-#' types=c(rep("ordinal",2),rep("nominal",2),rep("binary",3),
-#'         "response","treatment")
+#' types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
+#'         "response", "treatment")
 #' 
 #' # fit a dipm classification tree 
-#' tree2=dipm(Y~treatment | .,data,types=types,maxdepth=2)
+#' tree2 = dipm(Y ~ treatment | ., data, types = types, maxdepth = 2)
 #'
 #' #
 #' # ... an example with a survival outcome variable
 #' #     and two treatment groups
 #' #
 #'
-#' N=300
+#' N = 300
 #' set.seed(321)
 #'
 #' # generate binary treatments
-#' treatment=rbinom(N,1,0.5)
+#' treatment = rbinom(N, 1, 0.5)
 #'
 #' # generate candidate split variables
-#' X1=rnorm(n=N,mean=0,sd=1)
-#' X2=rnorm(n=N,mean=0,sd=1)
-#' X3=rnorm(n=N,mean=0,sd=1)
-#' X4=rnorm(n=N,mean=0,sd=1)
-#' X5=rnorm(n=N,mean=0,sd=1)
-#' X=cbind(X1,X2,X3,X4,X5)
-#' colnames(X)=paste0("X",1:5)
+#' X1 = rnorm(n = N, mean = 0, sd = 1)
+#' X2 = rnorm(n = N, mean = 0, sd = 1)
+#' X3 = rnorm(n = N, mean = 0, sd = 1)
+#' X4 = rnorm(n = N, mean = 0, sd = 1)
+#' X5 = rnorm(n = N, mean = 0, sd = 1)
+#' X = cbind(X1, X2, X3, X4, X5)
+#' colnames(X) = paste0("X", 1:5)
 #'
 #' # generate survival outcome variable
-#' calculateLink <- function(X,treatment) {
+#' calculateLink = function(X, treatment){
 #'
-#'     X[,1] + 0.5*X[,3] + (3*treatment - 1.5)*(abs(X[,5]) - 0.67)
+#'     X[, 1] + 0.5 * X[, 3] + (3 * treatment - 1.5) * (abs(X[, 5]) - 0.67)
 #' }
 #'
-#' Link=calculateLink(X,treatment)
-#' T=rexp(N,exp(-Link))
-#' C0=rexp(N,0.1*exp(X[,5]+X[,2]))
-#' Y=pmin(T,C0)
-#' C=(T <= C0)
+#' Link = calculateLink(X, treatment)
+#' T = rexp(N, exp(-Link))
+#' C0 = rexp(N, 0.1 * exp(X[, 5] + X[, 2]))
+#' Y = pmin(T, C0)
+#' C = (T <= C0)
 #'
 #' # combine variables in a data frame
-#' data=data.frame(X,Y,C,treatment)
+#' data = data.frame(X, Y, C, treatment)
 #' 
 #' # fit a dipm classification tree 
-#' tree3=dipm(Surv(Y,C)~treatment | .,data,ntree=1,maxdepth=2,
-#'            maxdepth2=6)
+#' tree3 = dipm(Surv(Y, C) ~ treatment | .,data, ntree = 1, maxdepth = 2,
+#'            maxdepth2 = 6)
 #'
 #' #
 #' # ... an example with a survival outcome variable
 #' #     and four treatment groups
 #' #
 #' 
-#' N=800
+#' N = 800
 #' set.seed(321)
 #' 
 #' # generate treatments
-#' treatment=sample(1:4,N,replace=TRUE)
+#' treatment = sample(1:4, N, replace = TRUE)
 #' 
 #' # generate candidate split variables
-#' X1=round(rnorm(n=N,mean=0,sd=1),4)
-#' X2=round(rnorm(n=N,mean=0,sd=1),4)
-#' X3=sample(1:4,N,replace=TRUE)
-#' X4=sample(1:5,N,replace=TRUE)
-#' X5=rbinom(N,1,0.5)
-#' X6=rbinom(N,1,0.5)
-#' X7=rbinom(N,1,0.5)
-#' X=cbind(X1,X2,X3,X4,X5,X6,X7)
-#' colnames(X)=paste0("X",1:7)
+#' X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+#' X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+#' X3 = sample(1:4, N, replace = TRUE)
+#' X4 = sample(1:5, N, replace = TRUE)
+#' X5 = rbinom(N, 1, 0.5)
+#' X6 = rbinom(N, 1, 0.5)
+#' X7 = rbinom(N, 1, 0.5)
+#' X = cbind(X1, X2, X3, X4, X5, X6, X7)
+#' colnames(X) = paste0("X", 1:7)
 #' 
 #' # generate survival outcome variable
-#' calculateLink<-function(X,treatment,noise){
+#' calculateLink = function(X, treatment, noise){
 #' 
-#'     -0.2*( treatment == 1 ) +
-#'     -1.1*X[,1] + 
-#'     1.2*( treatment == 1 )*X[,1] +
-#'     1.2*X[,2]
+#'     -0.2 * (treatment == 1) +
+#'     -1.1 * X[, 1] + 
+#'     1.2 * (treatment == 1) * X[, 1] +
+#'     1.2 * X[, 2]
 #' }
 #' 
-#' Link=calculateLink(X,treatment)
-#' T=rweibull(N,shape=2,scale=exp(Link))
-#' Cnoise=runif(n=N)+runif(n=N)
-#' C0=rexp(N,exp(0.3*-Cnoise))
-#' Y=pmin(T,C0)
-#' C=(T <= C0)
+#' Link = calculateLink(X, treatment)
+#' T = rweibull(N, shape=2, scale = exp(Link))
+#' Cnoise = runif(n = N) + runif(n = N)
+#' C0 = rexp(N, exp(0.3 * -Cnoise))
+#' Y = pmin(T, C0)
+#' C = (T <= C0)
 #' 
 #' # combine variables in a data frame
-#' data=data.frame(X,Y,C,treatment)
+#' data = data.frame(X, Y, C, treatment)
 #' 
 #' # create vector of variable types
-#' types=c(rep("ordinal",2),rep("nominal",2),rep("binary",3),
-#'         "response","C","treatment")
+#' types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3), 
+#'         "response", "C", "treatment")
 #' 
 #' # fit two dipm classification trees 
-#' tree4=dipm(Surv(Y,C)~treatment | .,data,types=types,ntree=1,
-#'            maxdepth=2,maxdepth2=6)
-#' tree5=dipm(Surv(Y,C)~treatment |X3+X4,data,types=types,ntree=1,
-#'            maxdepth=2,maxdepth2=6)
+#' tree4 = dipm(Surv(Y, C) ~ treatment | ., data, types = types, ntree = 1, 
+#'            maxdepth = 2, maxdepth2 = 6)
+#' tree5 = dipm(Surv(Y, C) ~ treatment | X3 + X4, data, types = types, ntree = 1, 
+#'            maxdepth = 2, maxdepth2 = 6)
 #' }
 #' 
 #' @export
@@ -396,233 +396,237 @@
 #' @import survival
 #' @import stats
 
-dipm <- function(formula,
+dipm = function(formula,
                  data,
-                 types=NULL,
-                 nmin=5,
-                 nmin2=5,
-                 ntree=NULL,
-                 mtry=0,
-                 maxdepth=-7,
-                 maxdepth2=-7,
-                 print=TRUE,
-                 dataframe=FALSE,
-                 prune=FALSE) {
+                 types = NULL,
+                 nmin = 5,
+                 nmin2 = 5,
+                 ntree = NULL,
+                 mtry = Inf,
+                 maxdepth = Inf,
+                 maxdepth2 = Inf,
+                 print = TRUE,
+                 dataframe = FALSE,
+                 prune = FALSE){
 
 #    check inputs
-    if ( missing(formula) ) {
+    if(missing(formula)){
         stop("The formula input is missing.")
     }
 
-    if ( missing(data) ) {
+    if(missing(data)){
         stop("The data input is missing.")
     }
 
 #    coerce data input to R "data.frame" object
-    data=as.data.frame(data)
+    data = as.data.frame(data)
 
 #    coerce formula input to R "formula" object
-    form=as.formula(formula)
+    form = as.formula(formula)
 
 #    if not missing, coerce types input to R "data.frame" object
-    if ( missing(types) == FALSE ) {
+    if(missing(types) == FALSE){
 
-        types=as.data.frame(types)
+        types = as.data.frame(types)
 
-        if ( nrow(types) != 1 ) {
+        if(nrow(types) != 1){
 
-            types=t(types)
-            types=as.data.frame(types)
+            types = t(types)
+            types = as.data.frame(types)
         }
 
-        if ( ncol(types) != ncol(data) ) {
+        if(ncol(types) != ncol(data)){
             stop("The number of variables in types does not equal the number of variables in the data.")
         }
 
-        colnames(types)=colnames(data)
+        colnames(types) = colnames(data)
     }
 
 #    get names of variables in the formula
-    form_vars=all.vars(form)      # all variables
-    form_lhs=all.vars(form[[2]])  # variables to the left of ~
-    form_rhs=all.vars(form[[3]])  # variables to the right of ~
+    form_vars = all.vars(form)      # all variables
+    form_lhs = all.vars(form[[2]])  # variables to the left of ~
+    form_rhs = all.vars(form[[3]])  # variables to the right of ~
 
 #    response variable should always be (first) in lhs
-    Y=data[,form_lhs[1]]
+    Y = data[, form_lhs[1]]
 
 #    get censoring variable if applicable
-    if ( length(form_lhs) == 1 ) {
+    if(length(form_lhs) == 1){
 
-        C=rep(0,nrow(data))
-        surv=0
+        C = rep(0, nrow(data))
+        surv = 0
     }
 
-    if ( length(form_lhs) == 2 ) {
+    if(length(form_lhs) == 2){
 
-        C=data[,form_lhs[2]]
-        surv=1
+        C = data[, form_lhs[2]]
+        surv = 1
     }
 
 #    treatment variable should always be first in rhs
-    treatment=data[,form_rhs[1]]
+    treatment = data[, form_rhs[1]]
 
 #    determine appropriate method from data and value of "mtry"
-    ntrts=nlevels(as.factor(treatment))
+    ntrts = nlevels(as.factor(treatment))
+    
+    if(mtry == Inf){
+        mtry = 0
+    }
+    
+    if(maxdepth == Inf){
+        maxdepth = -7
+    }
+    
+    if(maxdepth2 == Inf){
+        maxdepth2 = -7
+    }
 
-    if ( ntrts <= 1 ) {
+    if(ntrts <= 1){
         stop("At least 2 treatment groups are required.")
     }
 
-    if ( ntrts == 2 ) {
+    if(ntrts == 2){
 
-        if ( surv == 0 ) {
+        if(surv == 0){
 
-            if ( mtry == 0 ) method=6
-            else method=7
+            if(mtry == 0) method = 6
+            else method = 7
 
-        } else if ( surv == 1 ) {
+        }else if(surv == 1){
 
-            if ( mtry == 0 ) method=12
-            else method=13
+            if(mtry == 0) method = 12
+            else method = 13
         }
 
-    } else if ( ntrts > 2 ) {
+    }else if(ntrts > 2){
 
-        if ( surv == 0 ) {
+        if(surv == 0){
 
-            if ( mtry == 0 ) method=22
-            else method=23
+            if(mtry == 0) method = 22
+            else method = 23
 
-        } else if ( surv == 1 ) {
+        }else if(surv == 1){
 
-            if ( mtry == 0 ) method=20
+            if( mtry == 0 ) method=20
             else method=21
         }
     }
 
 #    get matrix of candidate split variables X
-    if ( form_rhs[2] == "." ) {  # account for Y ~ treatment | . 
+    if( form_rhs[2] == "." ){  # account for Y ~ treatment | . 
                                  # formula
 
-        exclude=c(which(colnames(data) == form_lhs[1]), # Y variable
+        exclude = c(which(colnames(data) == form_lhs[1]), # Y variable
                   which(colnames(data) == form_rhs[1])) # treatment
 
-        if ( length(form_lhs) == 2 ) { # exclude censoring indicator
-
-            exclude=c(exclude,which(colnames(data) == form_lhs[2]))
+        if(length(form_lhs) == 2){ # exclude censoring indicator
+            exclude = c(exclude,which(colnames(data) == form_lhs[2]))
         }
 
-        X=data.frame(data[,-exclude])
-        types=types[,-exclude]
+        X = data.frame(data[, -exclude])
+        types = types[, -exclude]
 
-    } else {
-
-        include=which(colnames(data) %in% form_rhs[-1])
-
-        X=data.frame(data[,include])
-        types=types[,include]
+    }else{
+        include = which(colnames(data) %in% form_rhs[-1])
+        X = data.frame(data[, include])
+        types = types[, include]
     }
 
 #    calculate number of observations n and variables nc
-    n=nrow(X)
-    nc=ncol(X)
-    if(nc==1){
+    n = nrow(X)
+    nc = ncol(X)
+    if(nc == 1){
         names(X) = names(data)[-exclude]
     }
 
 #    use recommended value of total number of embedded trees
 #    if ntree argument is blank
-    if ( missing(ntree) ) {
-
-        if ( method %in% c(6,12,20,22) ) {
-
-            ntree=ceiling(min(max(sqrt(n),sqrt(nc)),1000)) 
-
-        } else if ( method %in% c(7,13,21,23) ) {
-
-            ntree=ceiling(min(max(n,nc),1000)) 
+    if( missing(ntree)){
+        if(method %in% c(6, 12, 20, 22)){
+            ntree = ceiling(min(max(sqrt(n), sqrt(nc)), 1000)) 
+        }else if(method %in% c(7, 13, 21, 23)){
+            ntree = ceiling(min(max(n, nc), 1000)) 
         }
     }
 
 #    prepare types
-    if ( is.null(types) ) {  
+    if(is.null(types)){  
 
-        types=rep(2,nc) # default is to assume all candidate
+        types = rep(2, nc) # default is to assume all candidate
                         # split variables are ordinal
 
         message("Note that all candidate split variables are assumed to be ordinal.")
 
-    } else {
-
-        lll=ncol(types)
-        for (i in 1:lll){
-            if(types[i]=="binary") types[i]=1
-            if(types[i]=="ordinal") types[i]=2
-            if(types[i]=="nominal") types[i]=3
+    }else{
+        lll = ncol(types)
+        for(i in 1:lll){
+            if(types[i] == "binary") types[i] = 1
+            if(types[i] == "ordinal") types[i] = 2
+            if(types[i] == "nominal") types[i] = 3
         }
     }
 
 #    create array of number of categories for nominal variables
-    ifnominal=any(types == 3)
-    if ( ifnominal == TRUE ) {
+    ifnominal = any(types == 3)
+    if(ifnominal == TRUE){
 
-        inom=which( types == 3 )
-        for ( i in 1:length(inom) ) {
-            X[,inom[i]]=factor(X[,inom[i]])
-            data[,colnames(X)[inom[i]]] = X[,inom[i]]
+        inom = which(types == 3)
+        for(i in 1:length(inom)){
+            X[, inom[i]] = factor(X[, inom[i]])
+            data[, colnames(X)[inom[i]]] = X[, inom[i]]
         }
 
-        ncat=sapply(X,function(x) 
-                    if ( is.null(levels(x)) ) -7 
+        ncat = sapply(X, function(x) 
+                    if(is.null(levels(x))) -7 
                     else max(as.numeric(levels(x)[x])))
 
     } else {
 
-        ncat=rep(-7,nc)
+        ncat = rep(-7, nc)
     }
 
 #    prepare covariate data
-    XC=t(X)
+    XC = t(X)
 
 #    set types of R arguments to C
-    storage.mode(ntree)="integer"
-    storage.mode(n)="integer"
-    storage.mode(nc)="integer"
-    storage.mode(Y)="double"
-    storage.mode(XC)="double"
-    storage.mode(types)="integer"
-    storage.mode(ncat)="integer"
-    storage.mode(treatment)="integer"
-    storage.mode(C)="integer"
-    storage.mode(nmin)="integer"
-    storage.mode(nmin2)="integer"
-    storage.mode(mtry)="integer"
-    storage.mode(maxdepth)="integer"
-    storage.mode(maxdepth2)="integer"
-    storage.mode(method)="integer"
+    storage.mode(ntree) = "integer"
+    storage.mode(n) = "integer"
+    storage.mode(nc) = "integer"
+    storage.mode(Y) = "double"
+    storage.mode(XC) = "double"
+    storage.mode(types) = "integer"
+    storage.mode(ncat) = "integer"
+    storage.mode(treatment) = "integer"
+    storage.mode(C) = "integer"
+    storage.mode(nmin) = "integer"
+    storage.mode(nmin2) = "integer"
+    storage.mode(mtry) = "integer"
+    storage.mode(maxdepth) = "integer"
+    storage.mode(maxdepth2) = "integer"
+    storage.mode(method) = "integer"
 
-    tree=.Call("maketree",
-               ntree=ntree,
-               n=n,
-               nc=nc,
-               Y=Y,
-               X=XC,
-               types=types,
-               ncat=ncat,
-               treat=treatment,
-               censor=C,
-               nmin=nmin,
-               nmin2=nmin2,
-               mtry=mtry,
-               maxdepth=maxdepth,
-               maxdepth2=maxdepth2,
-               method=method,
+    tree = .Call("maketree",
+               ntree = ntree,
+               n = n,
+               nc = nc,
+               Y = Y,
+               X = XC,
+               types = types,
+               ncat = ncat,
+               treat = treatment,
+               censor = C,
+               nmin = nmin,
+               nmin2 = nmin2,
+               mtry = mtry,
+               maxdepth = maxdepth,
+               maxdepth2 = maxdepth2,
+               method = method,
                environment(lm_R_to_C))
 
     rm(XC)
 
 #    reformat tree
-    tree_txt=data.frame(as.vector(tree[[1]]),
+    tree_txt = data.frame(as.vector(tree[[1]]),
                         as.vector(tree[[2]]),
                         as.vector(tree[[3]]),
                         as.vector(tree[[4]]),
@@ -640,7 +644,7 @@ dipm <- function(formula,
                         as.vector(tree[[16]]),
                         as.vector(tree[[17]]))
 
-    colnames(tree_txt)=c("node",
+    colnames(tree_txt) = c("node",
                          "splitvar",
                          "type",
                          "sign",
@@ -661,12 +665,12 @@ dipm <- function(formula,
 #    process tree output and/or print tree to screen
     if(form_rhs[2] != "."){
         splitvar_include = t(data.frame(include))
-        colnames(splitvar_include) <- colnames(X)
+        colnames(splitvar_include) = colnames(X)
     }else{
         splitvar_include = NULL
     }
-    tree_txt=print.dipm(tree_txt,X,Y,C,treatment,
-                        types,ncat,method,ntree,print,
+    tree_txt = print.dipm(tree_txt, X, Y, C, treatment,
+                        types, ncat, method, ntree, print,
                         splitvar_include)
     if(prune){
         tree_txt = pmprune(tree_txt)
@@ -677,14 +681,14 @@ dipm <- function(formula,
     }else{
         tree_pn = ini_node(1, tree_txt, data, form_rhs[1], surv)
         if(surv){
-            tree_py <- party(tree_pn, data,
-                             fitted = data.frame(
+            tree_py = party(tree_pn, data,
+                            fitted = data.frame(
                                  "(fitted)" = fitted_node(tree_pn, data = data),
                                  "(response)" = Surv(Y, C), check.names = F),
                              terms = terms(form))
         }else{
-            tree_py <- party(tree_pn, data,
-                             fitted = data.frame(
+            tree_py = party(tree_pn, data,
+                            fitted = data.frame(
                                  "(fitted)" = fitted_node(tree_pn, data = data),
                                  "(response)" = Y, check.names = F),
                              terms = terms(form))

@@ -31,38 +31,37 @@
 #' @importFrom utils capture.output
 #' @noRd
 
-coxph_R_to_C <- function(X) {
+coxph_R_to_C = function(X){
 
-    old <- options()         
+    old = options()         
     on.exit(options(old))  
     
-    Y=X[,1]
-    C=X[,2]
-    treatment=X[,3]
-    split=X[,4]
+    Y = X[, 1]
+    C = X[, 2]
+    treatment = X[, 3]
+    split = X[, 4]
 
 #    if a treatment group only has censored observations, return 0
-    if ( length( table(C[which(treatment==0)]) ) == 1 ||
-         length( table(C[which(treatment==1)]) ) == 1 ) {
-
+    if(length(table(C[which(treatment==0)])) == 1 ||
+         length(table(C[which(treatment==1)])) == 1){
         return(0)
     }
 
 #    save "coxph" warnings in x
-    options(warn=1) 
+    options(warn = 1) 
 
-    x=capture.output({
-        fit0=coxph(Surv(Y,C)~treatment+split+treatment*split)
-    },type="message")
+    x = capture.output({
+        fit0 = coxph(Surv(Y, C) ~ treatment + split + treatment * split)
+    }, type = "message")
 
 #    if there is a warning, return 0
-    if ( length(x) > 0 ) {  # if there is at least 1 warning
+    if(length(x) > 0){  # if there is at least 1 warning
         return(0)
     }
 
 #    get z-statistic of split by treatment interaction term
-    fit=summary(fit0)
-    val=fit$"coefficients"["treatment:split","z"]
+    fit = summary(fit0)
+    val = fit$"coefficients"["treatment:split", "z"]
 
     return(val^2)
 }

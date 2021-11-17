@@ -11,7 +11,7 @@
 #'          Note that here, the treatment variable is 
 #'          not binary, i.e., there may be more than 
 #'          2 treatment groups
-#' @return A squared z-statistic 
+#' @return A squared t-statistic 
 #'         with the largest magnitude among all of the 
 #'         split by treatment interaction terms in a 
 #'         multiple linear regression model
@@ -35,32 +35,32 @@
 #' @importFrom utils capture.output
 #' @noRd
 
-lm_R_to_C <- function(X) {
+lm_R_to_C = function(X){
     
-    old <- options()         
+    old = options()         
     on.exit(options(old))  
 
-    Y=X[,1]
-    treatment=as.factor(X[,2])
-    split=X[,3]
+    Y = X[, 1]
+    treatment = as.factor(X[, 2])
+    split = X[, 3]
 
 #    save warnings in x
-    options(warn=1) 
+    options(warn = 1) 
 
-    x=capture.output({
-        fit0=lm(Y~treatment+split+treatment*split)
-    },type="message")
+    x = capture.output({
+        fit0 = lm(Y ~ treatment + split + treatment * split)
+    }, type = "message")
 
 #    if there is a warning, return 0
-    if ( length(x) > 0 ) {  # if there is at least 1 warning
+    if(length(x) > 0){  # if there is at least 1 warning
         return(0)
     }
 
-#    get the z-statistic with the largest magnitude of all 
+#    get the t-statistic with the largest magnitude of all 
 #    split by treatment interaction terms
-    fit=summary(fit0)
-    i_int=grep(":split",rownames(fit$"coefficients"),value=FALSE)
-    val=max(abs(fit$"coefficients"[i_int,"t value"]))
+    fit = summary(fit0)
+    i_int = grep(":split", rownames(fit$"coefficients"), value=FALSE)
+    val = max(abs(fit$"coefficients"[i_int, "t value"]))
 
     return(val^2)
 }

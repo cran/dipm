@@ -36,46 +36,43 @@
 #' @importFrom utils capture.output
 #' @noRd
 
-coxph_R_to_C_multi <- function(X) {
+coxph_R_to_C_multi = function(X){
     
-    old <- options()         
+    old = options()         
     on.exit(options(old))  
 
-    Y=X[,1]
-    C=X[,2]
-    treatment=as.factor(X[,3])
-    split=X[,4]
+    Y = X[, 1]
+    C = X[, 2]
+    treatment = as.factor(X[, 3])
+    split = X[, 4]
 
 #    if a treatment group only has censored observations, return 0
-    trts=unique(X[,3])
-    ntrt=length(trts)
+    trts = unique(X[, 3])
+    ntrt = length(trts)
 
-    for ( i in 1:ntrt ) {
-
-        if ( length( table(C[which(treatment==trts[i])]) ) == 1 ) {
-
+    for(i in 1:ntrt){
+        if(length(table(C[which(treatment==trts[i])])) == 1){
             return(0)
         }
     }
 
 #    save "coxph" warnings in x
-    options(warn=1) 
+    options(warn = 1) 
 
-    x=capture.output({
-        fit0=coxph(Surv(Y,C)~treatment+split+treatment*split)
-    },type="message")
+    x = capture.output({
+        fit0 = coxph(Surv(Y, C) ~ treatment + split + treatment * split)
+    }, type = "message")
 
 #    if there is a warning, return 0
-    if ( length(x) > 0 ) {  # if there is at least 1 warning
-
+    if(length(x) > 0){  # if there is at least 1 warning
         return(0)
     }
 
 #    get the z-statistic with the largest magnitude of all 
 #    split by treatment interaction terms
-    fit=summary(fit0)
-    i_int=grep(":split",rownames(fit$"coefficients"),value=FALSE)
-    val=max(abs(fit$"coefficients"[i_int,"z"]))
+    fit = summary(fit0)
+    i_int = grep(":split", rownames(fit$"coefficients"), value = FALSE)
+    val = max(abs(fit$"coefficients"[i_int, "z"]))
 
     return(val^2)
 }

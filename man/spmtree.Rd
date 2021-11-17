@@ -9,7 +9,7 @@ spmtree(
   data,
   types = NULL,
   nmin = 5,
-  maxdepth = -7,
+  maxdepth = Inf,
   print = TRUE,
   dataframe = FALSE,
   prune = FALSE
@@ -165,47 +165,47 @@ To identify the best split at each node of the
 #     and two treatment groups
 #
 
-N=300
+N = 300
 set.seed(123)
 
 # generate binary treatments
-treatment=rbinom(N,1,0.5)
+treatment = rbinom(N, 1, 0.5)
 
 # generate candidate split variables
-X1=rnorm(n=N,mean=0,sd=1)
-X2=rnorm(n=N,mean=0,sd=1)
-X3=rnorm(n=N,mean=0,sd=1)
-X4=rnorm(n=N,mean=0,sd=1)
-X5=rnorm(n=N,mean=0,sd=1)
-X=cbind(X1,X2,X3,X4,X5)
-colnames(X)=paste0("X",1:5)
+X1 = rnorm(n = N, mean = 0, sd = 1)
+X2 = rnorm(n = N, mean = 0, sd = 1)
+X3 = rnorm(n = N, mean = 0, sd = 1)
+X4 = rnorm(n = N, mean = 0, sd = 1)
+X5 = rnorm(n = N, mean = 0, sd = 1)
+X = cbind(X1, X2, X3, X4, X5)
+colnames(X) = paste0("X", 1:5)
 
 # generate continuous outcome variable
-calculateLink <- function(X,treatment) {
+calculateLink = function(X, treatment){
 
-    ( (X[,1] <= 0) & (X[,2] <= 0) )*
-        ( 25*(1-treatment) + 8*treatment) + 
+    ((X[, 1] <= 0) & (X[, 2] <= 0)) *
+        (25 * (1 - treatment) + 8 * treatment) + 
 
-    ( (X[,1] <= 0) & (X[,2] > 0) )*
-        ( 18*(1-treatment) + 20*treatment ) +
+    ((X[, 1] <= 0) & (X[, 2] > 0)) *
+        (18 * (1 - treatment) + 20 * treatment) +
 
-    ( (X[,1] > 0) & (X[,3] <= 0) )*
-        ( 20*(1-treatment) + 18*treatment ) + 
+    ((X[, 1] > 0) & (X[, 3] <= 0)) *
+        (20 * (1 - treatment) + 18 * treatment) + 
 
-    ( (X[,1] > 0) & (X[,3] > 0) )*
-        ( 8*(1-treatment) + 25*treatment )
+    ((X[, 1] > 0) & (X[, 3] > 0)) *
+        (8 * (1 - treatment) + 25 * treatment)
 }
 
-Link=calculateLink(X,treatment)
-Y=rnorm(N,mean=Link,sd=1)
+Link = calculateLink(X, treatment)
+Y = rnorm(N, mean = Link, sd = 1)
 
 # combine variables in a data frame
-data=data.frame(X,Y,treatment)
+data = data.frame(X, Y, treatment)
 
 # fit a classification tree
-tree1=spmtree(Y~treatment | .,data,maxdepth=3)
+tree1 = spmtree(Y ~ treatment | ., data, maxdepth = 3)
 # predict optimal treatment for new subjects
-predict(tree1, newdata=head(data), 
+predict(tree1, newdata = head(data), 
 FUN = function(n)  as.numeric(n$info$opt_trt))
 
 \donttest{
@@ -214,131 +214,131 @@ FUN = function(n)  as.numeric(n$info$opt_trt))
 #     and three treatment groups
 #
 
-N=600
+N = 600
 set.seed(123)
 
 # generate treatments
-treatment=sample(1:3,N,replace=TRUE)
+treatment = sample(1:3, N, replace = TRUE)
 
 # generate candidate split variables
-X1=round(rnorm(n=N,mean=0,sd=1),4)
-X2=round(rnorm(n=N,mean=0,sd=1),4)
-X3=sample(1:4,N,replace=TRUE)
-X4=sample(1:5,N,replace=TRUE)
-X5=rbinom(N,1,0.5)
-X6=rbinom(N,1,0.5)
-X7=rbinom(N,1,0.5)
-X=cbind(X1,X2,X3,X4,X5,X6,X7)
-colnames(X)=paste0("X",1:7)
+X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+X3 = sample(1:4, N, replace = TRUE)
+X4 = sample(1:5, N, replace = TRUE)
+X5 = rbinom(N, 1, 0.5)
+X6 = rbinom(N, 1, 0.5)
+X7 = rbinom(N, 1, 0.5)
+X = cbind(X1, X2, X3, X4, X5, X6, X7)
+colnames(X) = paste0("X", 1:7)
 
 # generate continuous outcome variable
-calculateLink<-function(X,treatment){
+calculateLink = function(X, treatment){
 
-    10.2 - 0.3*( treatment == 1 ) - 0.1*X[,1] + 
-    2.1*( treatment == 1 )*X[,1] +
-    1.2*X[,2]
+    10.2 - 0.3 * (treatment == 1) - 0.1 * X[, 1] + 
+    2.1 * (treatment == 1) * X[, 1] +
+    1.2 * X[, 2]
 }
 
-Link=calculateLink(X,treatment)
-Y=rnorm(N,mean=Link,sd=1)
+Link = calculateLink(X, treatment)
+Y = rnorm(N, mean = Link, sd = 1)
 
 # combine variables in a data frame
-data=data.frame(X,Y,treatment)
+data = data.frame(X, Y, treatment)
 
 # create vector of variable types
-types=c(rep("ordinal",2),rep("nominal",2),rep("binary",3),
-        "response","treatment")
+types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
+        "response", "treatment")
 
 # fit a classification tree
-tree2=spmtree(Y~treatment | .,data,types=types)
+tree2 = spmtree(Y ~ treatment | ., data, types = types)
 
 #
 # ... an example with a survival outcome variable
 #     and two treatment groups
 #
 
-N=300
+N = 300
 set.seed(321)
 
 # generate binary treatments
-treatment=rbinom(N,1,0.5)
+treatment = rbinom(N, 1, 0.5)
 
 # generate candidate split variables
-X1=rnorm(n=N,mean=0,sd=1)
-X2=rnorm(n=N,mean=0,sd=1)
-X3=rnorm(n=N,mean=0,sd=1)
-X4=rnorm(n=N,mean=0,sd=1)
-X5=rnorm(n=N,mean=0,sd=1)
-X=cbind(X1,X2,X3,X4,X5)
-colnames(X)=paste0("X",1:5)
+X1 = rnorm(n = N, mean = 0, sd = 1)
+X2 = rnorm(n = N, mean = 0, sd = 1)
+X3 = rnorm(n = N, mean = 0, sd = 1)
+X4 = rnorm(n = N, mean = 0, sd = 1)
+X5 = rnorm(n = N, mean = 0, sd = 1)
+X = cbind(X1, X2, X3, X4, X5)
+colnames(X) = paste0("X", 1:5)
 
 # generate survival outcome variable
-calculateLink <- function(X,treatment) {
+calculateLink = function(X, treatment){
 
-    X[,1] + 0.5*X[,3] + (3*treatment - 1.5)*(abs(X[,5]) - 0.67)
+    X[, 1] + 0.5 * X[, 3] + (3 * treatment - 1.5) * (abs(X[, 5]) - 0.67)
 }
 
-Link=calculateLink(X,treatment)
-T=rexp(N,exp(-Link))
-C0=rexp(N,0.1*exp(X[,5]+X[,2]))
-Y=pmin(T,C0)
-C=(T <= C0)
+Link = calculateLink(X, treatment)
+T = rexp(N, exp(-Link))
+C0 = rexp(N, 0.1 * exp(X[, 5] + X[, 2]))
+Y = pmin(T, C0)
+C = (T <= C0)
 
 # combine variables in a data frame
-data=data.frame(X,Y,C,treatment)
+data = data.frame(X, Y, C, treatment)
 
 # fit a classification tree
-tree3=spmtree(Surv(Y,C)~treatment | .,data,maxdepth=2)
+tree3 = spmtree(Surv(Y, C) ~ treatment | ., data, maxdepth = 2)
 
 #
 # ... an example with a survival outcome variable
 #     and four treatment groups
 #
 
-N=800
+N = 800
 set.seed(321)
 
 # generate treatments
-treatment=sample(1:4,N,replace=TRUE)
+treatment = sample(1:4, N, replace = TRUE)
 
 # generate candidate split variables
-X1=round(rnorm(n=N,mean=0,sd=1),4)
-X2=round(rnorm(n=N,mean=0,sd=1),4)
-X3=sample(1:4,N,replace=TRUE)
-X4=sample(1:5,N,replace=TRUE)
-X5=rbinom(N,1,0.5)
-X6=rbinom(N,1,0.5)
-X7=rbinom(N,1,0.5)
-X=cbind(X1,X2,X3,X4,X5,X6,X7)
-colnames(X)=paste0("X",1:7)
+X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+X3 = sample(1:4, N, replace = TRUE)
+X4 = sample(1:5, N, replace = TRUE)
+X5 = rbinom(N, 1, 0.5)
+X6 = rbinom(N, 1, 0.5)
+X7 = rbinom(N, 1, 0.5)
+X = cbind(X1, X2, X3, X4, X5, X6, X7)
+colnames(X) = paste0("X", 1:7)
 
 # generate survival outcome variable
-calculateLink<-function(X,treatment,noise){
+calculateLink = function(X, treatment, noise){
 
-    -0.2*( treatment == 1 ) +
-    -1.1*X[,1] + 
-    1.2*( treatment == 1 )*X[,1] +
-    1.2*X[,2]
+    -0.2 * (treatment == 1) +
+    -1.1 * X[, 1] + 
+    1.2 * (treatment == 1) * X[, 1] +
+    1.2 * X[, 2]
 }
 
-Link=calculateLink(X,treatment)
-T=rweibull(N,shape=2,scale=exp(Link))
-Cnoise=runif(n=N)+runif(n=N)
-C0=rexp(N,exp(0.3*-Cnoise))
-Y=pmin(T,C0)
-C=(T <= C0)
+Link = calculateLink(X, treatment)
+T = rweibull(N, shape = 2, scale = exp(Link))
+Cnoise = runif(n = N) + runif(n = N)
+C0 = rexp(N, exp(0.3 * -Cnoise))
+Y = pmin(T, C0)
+C = (T <= C0)
 
 # combine variables in a data frame
-data=data.frame(X,Y,C,treatment)
+data = data.frame(X, Y, C, treatment)
 
 # create vector of variable types
-types=c(rep("ordinal",2),rep("nominal",2),rep("binary",3),
-        "response","C","treatment")
+types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
+        "response", "C", "treatment")
 
 # fit two classification trees
-tree4=spmtree(Surv(Y,C)~treatment | .,data,types=types,maxdepth=2)
-tree5=spmtree(Surv(Y,C)~treatment |X3+X4,data,types=types,
-             maxdepth=2)
+tree4 = spmtree(Surv(Y, C) ~ treatment | ., data, types = types, maxdepth = 2)
+tree5 = spmtree(Surv(Y, C) ~ treatment | X3 + X4, data, types = types,
+             maxdepth = 2)
 }
 }
 \references{

@@ -86,51 +86,51 @@
 #' #
 #' 
 #' \donttest{
-#' N=100
+#' N = 100
 #' set.seed(123)
 #' 
 #' # generate treatments
-#' treatment=sample(1:3,N,replace=TRUE)
+#' treatment = sample(1:3, N, replace = TRUE)
 #' 
 #' # generate candidate split variables
-#' X1=round(rnorm(n=N,mean=0,sd=1),4)
-#' X2=round(rnorm(n=N,mean=0,sd=1),4)
-#' X3=sample(1:4,N,replace=TRUE)
-#' X4=sample(1:5,N,replace=TRUE)
-#' X5=rbinom(N,1,0.5)
-#' X6=rbinom(N,1,0.5)
-#' X7=rbinom(N,1,0.5)
-#' X=cbind(X1,X2,X3,X4,X5,X6,X7)
-#' colnames(X)=paste0("X",1:7)
+#' X1 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+#' X2 = round(rnorm(n = N, mean = 0, sd = 1), 4)
+#' X3 = sample(1:4, N, replace = TRUE)
+#' X4 = sample(1:5, N, replace = TRUE)
+#' X5 = rbinom(N, 1, 0.5)
+#' X6 = rbinom(N, 1, 0.5)
+#' X7 = rbinom(N, 1, 0.5)
+#' X = cbind(X1, X2, X3, X4, X5, X6, X7)
+#' colnames(X) = paste0("X", 1:7)
 #' 
 #' # generate continuous outcome variable
-#' calculateLink<-function(X,treatment){
+#' calculateLink = function(X, treatment){
 #' 
-#'     10.2 - 0.3*( treatment == 1 ) - 0.1*X[,1] + 
-#'     2.1*( treatment == 1 )*X[,1] +
-#'     1.2*X[,2]
+#'     10.2 - 0.3 * (treatment == 1) - 0.1 * X[, 1] + 
+#'     2.1 * (treatment == 1) * X[, 1] +
+#'     1.2 * X[, 2]
 #' }
 #' 
-#' Link=calculateLink(X,treatment)
-#' Y=rnorm(N,mean=Link,sd=1)
+#' Link = calculateLink(X, treatment)
+#' Y = rnorm(N, mean = Link, sd = 1)
 #' 
 #' # combine variables in a data frame
-#' data=data.frame(X,Y,treatment)
+#' data = data.frame(X, Y, treatment)
 #' 
 #' # create vector of variable types
-#' types=c(rep("ordinal",2),rep("nominal",2),rep("binary",3),
-#'             "response","treatment")
+#' types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
+#'             "response", "treatment")
 #' 
 #' # fit a classification tree
-#' tree=spmtree(Y~treatment | .,data,types=types,dataframe=TRUE)
+#' tree = spmtree(Y ~ treatment | ., data, types = types, dataframe = TRUE)
 #'
 #' # prune the tree
-#' ptree=pmprune(tree)
+#' ptree = pmprune(tree)
 #' }
 #' 
 #' @export
 
-pmprune <- function(tree) {
+pmprune = function(tree){
 #
 #  This function accepts as an argument a tree data
 #  frame object and returns a pruned tree. Terminal
@@ -138,31 +138,31 @@ pmprune <- function(tree) {
 #  treatment class.
 #
 
-    if ( nrow(tree) == 1 ) {
+    if(nrow(tree) == 1){
         return(tree)
     }
 
-    lll=seq(2,nrow(tree),2)
-    lll=lll[order(-lll)]
+    lll = seq(2, nrow(tree), 2)
+    lll = lll[order(-lll)]
 
-    for ( i in lll ) {
+    for(i in lll){
 
 #        do not consider non-terminal nodes
-        if ( is.na(tree$lchild[i]) == FALSE ) next()
+        if(is.na(tree$lchild[i]) == FALSE) next()
 
 #        the pair of nodes must be two terminal nodes
-        if ( is.na(tree$lchild[i+1]) == FALSE ) next()
+        if(is.na(tree$lchild[i + 1]) == FALSE) next()
 
 #        the pair of nodes must have the same best treat to be pruned
-        if ( tree$besttrt[i] != tree$besttrt[i+1] ) next()
+        if(tree$besttrt[i] != tree$besttrt[i + 1]) next()
 
-        j=which(tree$lchild == tree$node[i])
-        tree$lchild[j]=NA
-        tree$rchild[j]=NA
-        tree$splitvar[j]=NA
+        j = which(tree$lchild == tree$node[i])
+        tree$lchild[j] = NA
+        tree$rchild[j] = NA
+        tree$splitvar[j] = NA
 
         # to be compatible with party
-        # tree=tree[-c(i,i+1),] 
+        # tree = tree[-c(i, i + 1), ] 
     }
 
     return(tree)
