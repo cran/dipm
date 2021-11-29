@@ -1,4 +1,4 @@
-a5aa88838955a4353f0cc65337cee510 *DESCRIPTION
+97c2f7e2efb1f48cc8925ae6e0b778d2 *DESCRIPTION
 740da61fb22cdb876aa56dd4d7fb89c8 *NAMESPACE
 ac96b823b16ed25651e7dfbe395754d8 *R/coxph_R_to_C.R
 c42c575eb18c00ee88857d66d11c65de *R/coxph_R_to_C_multi.R
@@ -16,4 +16,4 @@ b4fdf49b942ea4059a67ca5f4d8e57e6 *man/dipm.Rd
 b74dc1ddb59ed45f4a508624ad4d00ca *src/Makevars
 73b340ea55d6dcc7821dc5501d872f70 *src/dipm.c
 e8fee6697f4a6e51c50fb5b3a9bfee86 *src/dipm_init.c
-e4e25a453c56273776ff076faaba81a8 *tests/Examples/dipm-Ex.Rout.save
+239643b252c65e20ce69b1d601e8fea0 *tests/Examples/dipm-Ex.Rout.save
