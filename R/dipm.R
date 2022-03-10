@@ -427,6 +427,11 @@ dipm = function(formula,
 #    if not missing, coerce types input to R "data.frame" object
     if(missing(types) == FALSE){
 
+        if(!all(types %in% c("ordinal", "nominal", "binary",
+                             "response", "C", "treatment"))){
+            stop("The type input is invalid.")
+        }
+        
         types = as.data.frame(types)
 
         if(nrow(types) != 1){
@@ -449,6 +454,9 @@ dipm = function(formula,
 
 #    response variable should always be (first) in lhs
     Y = data[, form_lhs[1]]
+    if(!class(Y) %in% c("numeric", "integer")){
+        stop("Response Y must be numerical.")
+    }
 
 #    get censoring variable if applicable
     if(length(form_lhs) == 1){
@@ -460,11 +468,20 @@ dipm = function(formula,
     if(length(form_lhs) == 2){
 
         C = data[, form_lhs[2]]
+        if(!class(C) %in% c("numeric", "integer", "logical")){
+            stop("C must be integers.")
+        }
+        if(!all(unique(C) %in% c(0, 1))){
+            stop("C must be 0 or 1.")
+        }
         surv = 1
     }
 
 #    treatment variable should always be first in rhs
     treatment = data[, form_rhs[1]]
+    if(!class(treatment) %in% c("numeric", "integer")){
+        stop("Treatment must be integers.")
+    }
 
 #    determine appropriate method from data and value of "mtry"
     ntrts = nlevels(as.factor(treatment))
@@ -486,6 +503,10 @@ dipm = function(formula,
     }
 
     if(ntrts == 2){
+        
+        if(!all(unique(treatment) %in% c(0, 1))){
+            stop("Treatment must be 0 or 1 for two treatment groups.")
+        }
 
         if(surv == 0){
 
@@ -499,6 +520,10 @@ dipm = function(formula,
         }
 
     }else if(ntrts > 2){
+        
+        if(!all(unique(treatment) %in% rep(1:ntrts))){
+            stop("Treatment must be 1 to ntrts for more than two treatment groups.")
+        }
 
         if(surv == 0){
 
@@ -525,7 +550,6 @@ dipm = function(formula,
 
         X = data.frame(data[, -exclude])
         types = types[, -exclude]
-
     }else{
         include = which(colnames(data) %in% form_rhs[-1])
         X = data.frame(data[, include])
@@ -536,7 +560,11 @@ dipm = function(formula,
     n = nrow(X)
     nc = ncol(X)
     if(nc == 1){
-        names(X) = names(data)[-exclude]
+        if( form_rhs[2] == "." ){
+            names(X) = names(data)[-exclude]
+        }else{
+            names(X) = names(data)[include]
+        }
     }
 
 #    use recommended value of total number of embedded trees
@@ -558,11 +586,54 @@ dipm = function(formula,
         message("Note that all candidate split variables are assumed to be ordinal.")
 
     }else{
+        if(nc == 1){
+            types = data.frame(types)
+            if( form_rhs[2] == "." ){
+                names(types) = names(data)[-exclude]
+            }else{
+                names(types) = names(data)[include]
+            }
+            rownames(types) = "types"
+        }
         lll = ncol(types)
         for(i in 1:lll){
             if(types[i] == "binary") types[i] = 1
             if(types[i] == "ordinal") types[i] = 2
             if(types[i] == "nominal") types[i] = 3
+        }
+    }
+    
+    ifbinary = any(types == 1)
+    if(ifbinary == TRUE){
+        ibin = which(types == 1)
+        if(length(ibin) == 1){
+            if(!class(data[, ibin]) %in% c("numeric", "integer")){
+                stop("Binary variables must be integers.")
+            }
+            if(!all(unique(data[, ibin]) %in% c(0, 1))){
+                stop("Binary varialbes must be 0 or 1.")
+            }
+        }else{
+            if(!all(apply(data[, ibin], 2, class) %in% c("numeric", "integer"))){
+                stop("Binary variables must be integers.")
+            }
+            if(!all(apply(data[, ibin], 2, unique) %in% c(0, 1))){
+                stop("Binary varialbes must be 0 or 1.")
+            }
+        }
+    }
+    
+    ifordinal = any(types == 2)
+    if(ifordinal == TRUE){
+        iord = which(types == 2)
+        if(length(iord) == 1){
+            if(!class(data[, iord]) %in% c("numeric", "integer")){
+                stop("Ordinal variables must be numerical.")
+            }
+        }else{
+            if(!all(apply(data[, iord], 2, class) %in% c("numeric", "integer"))){
+                stop("Ordinal variables must be numerical.")
+            }
         }
     }
 
@@ -572,6 +643,13 @@ dipm = function(formula,
 
         inom = which(types == 3)
         for(i in 1:length(inom)){
+            if(!class(X[, inom[i]]) %in% c("numeric", "integer")){
+                stop("Nominal variables must be integers.")
+            }
+            ncats = length(unique(X[, inom[i]]))
+            if(!all(unique(X[, inom[i]]) %in% rep(1:ncats))){
+                stop("Nominal must be 1 to ncats.")
+            }
             X[, inom[i]] = factor(X[, inom[i]])
             data[, colnames(X)[inom[i]]] = X[, inom[i]]
         }

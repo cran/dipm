@@ -137,7 +137,11 @@ pmprune = function(tree){
 #  node pairs are pruned when they have the same best
 #  treatment class.
 #
-
+    
+    if(class(tree) != "data.frame"){
+        stop("The input must be a data frame.")
+    }
+    
     if(nrow(tree) == 1){
         return(tree)
     }

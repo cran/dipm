@@ -373,8 +373,16 @@ print.dipm = function(tree_txt, X, Y, C, treatment,
 
 #            get the kaplan-meier curves by treatment group for 
 #            subjects in the current node
-            survobj = with(X[ifnode, ], Surv(Y[ifnode], C[ifnode] == 1))
-            km = survfit(survobj ~ treatment[ifnode], data = X[ifnode, ])
+            if(ncol(X) == 1){
+              temp_X = data.frame(X[ifnode, ])
+              names(temp_X) = names(X)
+              survobj = with(temp_X, Surv(Y[ifnode], C[ifnode] == 1))
+              km = survfit(survobj ~ treatment[ifnode], data = temp_X)
+            }else{
+              survobj = with(X[ifnode, ], Surv(Y[ifnode], C[ifnode] == 1))
+              km = survfit(survobj ~ treatment[ifnode], data = X[ifnode, ])
+            }
+                
             val = survmean(km, rmean = "individual")[[1]]
 
 #            get the mean survival values for each treatment group
