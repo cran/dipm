@@ -19,9 +19,9 @@ spmtree(
 \item{formula}{A description of the model to be fit with format
 \code{Y ~ treatment | X1 + X2} for data with a
 continuous outcome variable Y and 
-\code{Surv(Y,C) ~ treatment | X1 + X2} for data with
+\code{Surv(Y, delta) ~ treatment | X1 + X2} for data with
 a right-censored survival outcome variable Y and
-a censoring indicator C}
+a status indicator delta}
 
 \item{data}{A matrix or data frame of the data}
 
@@ -30,9 +30,9 @@ of each variable in the data; if left blank, the
 default is to assume all of the candidate split
 variables are ordinal; otherwise, all variables in 
 the data must be specified, and the possible variable 
-types are: "response", "treatment", "C", "binary", 
+types are: "response", "treatment", "status", "binary", 
 "ordinal", and "nominal" for outcome variable Y, the 
-treatment variable, the censoring indicator (if 
+treatment variable, the status indicator (if 
 applicable), binary candidate split variables, ordinal
 candidate split variables, and nominal candidate split
 variables respectively}
@@ -142,8 +142,8 @@ To identify the best split at each node of the
          requirements for the supplied data. First, the dataset
          must contain an outcome variable Y and a treatment
          variable. If Y is a right-censored survival time
-         outcome, then there must also be a censoring indicator
-         C, where values of 1 denote the occurrence of the 
+         outcome, then there must also be a status indicator
+         delta, where values of 1 denote the occurrence of the 
          (harmful) event of interest, and values of 0 denote
          censoring. If there are only two treatment groups, then
          the two possible values must be 0 or 1. If there are
@@ -282,13 +282,13 @@ Link = calculateLink(X, treatment)
 T = rexp(N, exp(-Link))
 C0 = rexp(N, 0.1 * exp(X[, 5] + X[, 2]))
 Y = pmin(T, C0)
-C = (T <= C0)
+delta = (T <= C0)
 
 # combine variables in a data frame
-data = data.frame(X, Y, C, treatment)
+data = data.frame(X, Y, delta, treatment)
 
 # fit a classification tree
-tree3 = spmtree(Surv(Y, C) ~ treatment | ., data, maxdepth = 2)
+tree3 = spmtree(Surv(Y, delta) ~ treatment | ., data, maxdepth = 2)
 
 #
 # ... an example with a survival outcome variable
@@ -326,36 +326,36 @@ T = rweibull(N, shape = 2, scale = exp(Link))
 Cnoise = runif(n = N) + runif(n = N)
 C0 = rexp(N, exp(0.3 * -Cnoise))
 Y = pmin(T, C0)
-C = (T <= C0)
+delta = (T <= C0)
 
 # combine variables in a data frame
-data = data.frame(X, Y, C, treatment)
+data = data.frame(X, Y, delta, treatment)
 
 # create vector of variable types
 types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3),
-        "response", "C", "treatment")
+        "response", "status", "treatment")
 
 # fit two classification trees
-tree4 = spmtree(Surv(Y, C) ~ treatment | ., data, types = types, maxdepth = 2)
-tree5 = spmtree(Surv(Y, C) ~ treatment | X3 + X4, data, types = types,
+tree4 = spmtree(Surv(Y, delta) ~ treatment | ., data, types = types, maxdepth = 2)
+tree5 = spmtree(Surv(Y, delta) ~ treatment | X3 + X4, data, types = types,
              maxdepth = 2)
 }
 }
 \references{
-Chen, V., Li, C., and Zhang, H. (2021). The dipm R 
+Chen, V., Li, C., and Zhang, H. (2022). The dipm R 
             package: implementing the depth importance in 
             precision medicine (DIPM) tree and forest based method.
             \emph{Manuscript}.
-
+            
+            Chen, V. and Zhang, H. (2022). Depth importance in 
+            precision medicine (DIPM): A tree-and forest-based 
+            method for right-censored survival outcomes. 
+            \emph{Biostatistics} \strong{23}(1), 157-172.
+            
             Chen, V. and Zhang, H. (2020). Depth importance in 
             precision medicine (DIPM): a tree and forest based method. 
             In \emph{Contemporary Experimental Design, 
             Multivariate Analysis and Data Mining}, 243-259.
-
-            Chen, V. and Zhang, H. (2020). Depth importance in 
-            precision medicine (DIPM): A tree-and forest-based 
-            method for right-censored survival outcomes. 
-            \emph{Biostatistics}.
 
             Tsai, W.-M., Zhang, H., Buta, E., O'Malley, S., 
             Gueorguieva, R. (2016). A modified classification

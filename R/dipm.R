@@ -8,18 +8,18 @@
 #' @param formula A description of the model to be fit with format
 #'                \code{Y ~ treatment | X1 + X2} for data with a
 #'                continuous outcome variable Y and 
-#'                \code{Surv(Y, C) ~ treatment | X1 + X2} for data with
+#'                \code{Surv(Y, delta) ~ treatment | X1 + X2} for data with
 #'                a right-censored survival outcome variable Y and
-#'                a censoring indicator C
+#'                a status indicator delta
 #' @param data A matrix or data frame of the data
 #' @param types A vector, data frame, or matrix of the types
 #'              of each variable in the data; if left blank, the
 #'              default is to assume all of the candidate split
 #'              variables are ordinal; otherwise, all variables in 
 #'              the data must be specified, and the possible variable 
-#'              types are: "response", "treatment", "C", "binary", 
+#'              types are: "response", "treatment", "status", "binary", 
 #'              "ordinal", and "nominal" for outcome variable Y, the 
-#'              treatment variable, the censoring indicator (if 
+#'              treatment variable, the status indicator (if 
 #'              applicable), binary candidate split variables, ordinal
 #'              candidate split variables, and nominal candidate split
 #'              variables respectively
@@ -98,8 +98,8 @@
 #'          requirements for the supplied data. First, the dataset
 #'          must contain an outcome variable Y and a treatment
 #'          variable. If Y is a right-censored survival time
-#'          outcome, then there must also be a censoring indicator
-#'          C, where values of 1 denote the occurrence of the 
+#'          outcome, then there must also be a status indicator
+#'          delta, where values of 1 denote the occurrence of the 
 #'          (harmful) event of interest, and values of 0 denote
 #'          censoring. If there are only two treatment groups, then
 #'          the two possible values must be 0 or 1. If there are
@@ -173,20 +173,20 @@
 #'         \item{besttrt}{Integers that denote the identified best 
 #'                        treatment assignment of each node}
 #'
-#' @references Chen, V., Li, C., and Zhang, H. (2021). The dipm R 
+#' @references Chen, V., Li, C., and Zhang, H. (2022). The dipm R 
 #'             package: implementing the depth importance in 
 #'             precision medicine (DIPM) tree and forest based method.
 #'             \emph{Manuscript}.
 #' 
+#'             Chen, V. and Zhang, H. (2022). Depth importance in 
+#'             precision medicine (DIPM): A tree-and forest-based 
+#'             method for right-censored survival outcomes. 
+#'             \emph{Biostatistics} \strong{23}(1), 157-172.
+#'             
 #'             Chen, V. and Zhang, H. (2020). Depth importance in 
 #'             precision medicine (DIPM): a tree and forest based method. 
 #'             In \emph{Contemporary Experimental Design, 
 #'             Multivariate Analysis and Data Mining}, 243-259.
-#' 
-#'             Chen, V. and Zhang, H. (2020). Depth importance in 
-#'             precision medicine (DIPM): A tree-and forest-based 
-#'             method for right-censored survival outcomes. 
-#'             \emph{Biostatistics}.
 #'             
 #'             Chen, X., Liu, C.-T., Zhang, M., and Zhang, H. (2007).
 #'             A forest-based approach to identifying gene and
@@ -330,13 +330,13 @@
 #' T = rexp(N, exp(-Link))
 #' C0 = rexp(N, 0.1 * exp(X[, 5] + X[, 2]))
 #' Y = pmin(T, C0)
-#' C = (T <= C0)
+#' delta = (T <= C0)
 #'
 #' # combine variables in a data frame
-#' data = data.frame(X, Y, C, treatment)
+#' data = data.frame(X, Y, delta, treatment)
 #' 
 #' # fit a dipm classification tree 
-#' tree3 = dipm(Surv(Y, C) ~ treatment | .,data, ntree = 1, maxdepth = 2,
+#' tree3 = dipm(Surv(Y, delta) ~ treatment | .,data, ntree = 1, maxdepth = 2,
 #'            maxdepth2 = 6)
 #'
 #' #
@@ -375,19 +375,19 @@
 #' Cnoise = runif(n = N) + runif(n = N)
 #' C0 = rexp(N, exp(0.3 * -Cnoise))
 #' Y = pmin(T, C0)
-#' C = (T <= C0)
+#' delta = (T <= C0)
 #' 
 #' # combine variables in a data frame
-#' data = data.frame(X, Y, C, treatment)
+#' data = data.frame(X, Y, delta, treatment)
 #' 
 #' # create vector of variable types
 #' types = c(rep("ordinal", 2), rep("nominal", 2), rep("binary", 3), 
-#'         "response", "C", "treatment")
+#'         "response", "status", "treatment")
 #' 
 #' # fit two dipm classification trees 
-#' tree4 = dipm(Surv(Y, C) ~ treatment | ., data, types = types, ntree = 1, 
+#' tree4 = dipm(Surv(Y, delta) ~ treatment | ., data, types = types, ntree = 1, 
 #'            maxdepth = 2, maxdepth2 = 6)
-#' tree5 = dipm(Surv(Y, C) ~ treatment | X3 + X4, data, types = types, ntree = 1, 
+#' tree5 = dipm(Surv(Y, delta) ~ treatment | X3 + X4, data, types = types, ntree = 1, 
 #'            maxdepth = 2, maxdepth2 = 6)
 #' }
 #' 
@@ -428,7 +428,7 @@ dipm = function(formula,
     if(missing(types) == FALSE){
 
         if(!all(types %in% c("ordinal", "nominal", "binary",
-                             "response", "C", "treatment"))){
+                             "response", "status", "treatment"))){
             stop("The type input is invalid.")
         }
         
@@ -458,7 +458,7 @@ dipm = function(formula,
         stop("Response Y must be numerical.")
     }
 
-#    get censoring variable if applicable
+#    get status variable if applicable
     if(length(form_lhs) == 1){
 
         C = rep(0, nrow(data))
@@ -469,10 +469,10 @@ dipm = function(formula,
 
         C = data[, form_lhs[2]]
         if(!class(C) %in% c("numeric", "integer", "logical")){
-            stop("C must be integers.")
+            stop("delta must be integers.")
         }
         if(!all(unique(C) %in% c(0, 1))){
-            stop("C must be 0 or 1.")
+            stop("delta must be 0 or 1.")
         }
         surv = 1
     }
@@ -544,7 +544,7 @@ dipm = function(formula,
         exclude = c(which(colnames(data) == form_lhs[1]), # Y variable
                   which(colnames(data) == form_rhs[1])) # treatment
 
-        if(length(form_lhs) == 2){ # exclude censoring indicator
+        if(length(form_lhs) == 2){ # exclude status indicator
             exclude = c(exclude,which(colnames(data) == form_lhs[2]))
         }
 
@@ -611,14 +611,14 @@ dipm = function(formula,
                 stop("Binary variables must be integers.")
             }
             if(!all(unique(data[, ibin]) %in% c(0, 1))){
-                stop("Binary varialbes must be 0 or 1.")
+                stop("Binary variables must be 0 or 1.")
             }
         }else{
             if(!all(apply(data[, ibin], 2, class) %in% c("numeric", "integer"))){
                 stop("Binary variables must be integers.")
             }
             if(!all(apply(data[, ibin], 2, unique) %in% c(0, 1))){
-                stop("Binary varialbes must be 0 or 1.")
+                stop("Binary variables must be 0 or 1.")
             }
         }
     }

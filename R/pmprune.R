@@ -138,7 +138,7 @@ pmprune = function(tree){
 #  treatment class.
 #
     
-    if(class(tree) != "data.frame"){
+    if(!inherits(tree, "data.frame")){
         stop("The input must be a data frame.")
     }
     

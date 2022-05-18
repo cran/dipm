@@ -22,7 +22,7 @@ ini_node = function(j, tree, data, trt, surv){
     kids = list(ini_node(tree$lchild[j], tree, data, trt, surv),
             ini_node(tree$rchild[j], tree, data, trt, surv)))
   }else{
-    if(class(data[, trt]) == "integer"||class(data[, trt]) == "numeric"){
+    if(inherits(data[, trt], "integer")||inherits(data[, trt], "numeric")){
       node = partynode(as.integer(tree$node[j]),
                         info = list(
     opt_trt = as.character(unique(data[, trt])[
