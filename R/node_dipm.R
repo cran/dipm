@@ -14,20 +14,20 @@
 #' 
 #' @return No return value, called for plot
 #' 
-#' @references Chen, V., Li, C., and Zhang, H. (2021). The dipm R 
-#'             package: implementing the depth importance in 
-#'             precision medicine (DIPM) tree and forest based method.
-#'             \emph{Manuscript}.
+#' @references Chen, V., Li, C., and Zhang, H. (2022). dipm: an 
+#'             R package implementing the Depth Importance in 
+#'             Precision Medicine (DIPM) tree and Forest-based method.
+#'             \emph{Bioinformatics Advances}, \strong{2}(1), vbac041.
 #' 
 #'             Chen, V. and Zhang, H. (2020). Depth importance in 
 #'             precision medicine (DIPM): a tree and forest based method. 
 #'             In \emph{Contemporary Experimental Design, 
 #'             Multivariate Analysis and Data Mining}, 243-259.
 #' 
-#'             Chen, V. and Zhang, H. (2020). Depth importance in 
+#'             Chen, V. and Zhang, H. (2022). Depth importance in 
 #'             precision medicine (DIPM): A tree-and forest-based 
 #'             method for right-censored survival outcomes. 
-#'             \emph{Biostatistics}.
+#'             \emph{Biostatistics} \strong{23}(1), 157-172.
 #'             
 #'             Seibold, H., Zeileis, A., and Hothorn, T. (2019). 
 #'             model4you: An R package for personalised treatment 

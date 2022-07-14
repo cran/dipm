@@ -394,10 +394,10 @@ tree5 = dipm(Surv(Y, delta) ~ treatment | X3 + X4, data, types = types, ntree = 
 
 }
 \references{
-Chen, V., Li, C., and Zhang, H. (2022). The dipm R 
-            package: implementing the depth importance in 
-            precision medicine (DIPM) tree and forest based method.
-            \emph{Manuscript}.
+Chen, V., Li, C., and Zhang, H. (2022). dipm: an 
+            R package implementing the Depth Importance in 
+            Precision Medicine (DIPM) tree and Forest-based method.
+            \emph{Bioinformatics Advances}, \strong{2}(1), vbac041.
 
             Chen, V. and Zhang, H. (2022). Depth importance in 
             precision medicine (DIPM): A tree-and forest-based 
