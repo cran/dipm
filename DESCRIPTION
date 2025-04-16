@@ -1,7 +1,7 @@
 Package: dipm
 Title: Depth Importance in Precision Medicine (DIPM) Method
-Version: 1.9
-Date: 2022-10-27
+Version: 1.10
+Date: 2025-04-15
 Authors@R: c(person(given = "Cai", family = "Li", 
 	             role = c("aut", "cre"), email = "cai.li.stats@gmail.com"),
              person(given = "Victoria", family = "Chen", 
@@ -20,9 +20,9 @@ License: GPL (>= 2)
 Encoding: UTF-8
 LazyLoad: yes
 Repository: CRAN
-RoxygenNote: 7.1.1
-Packaged: 2022-10-27 05:32:15 UTC; cli9
+RoxygenNote: 7.3.2
+Packaged: 2025-04-15 23:36:29 UTC; cli9
 Author: Cai Li [aut, cre],
   Victoria Chen [aut],
   Heping Zhang [aut]
-Date/Publication: 2022-10-27 15:05:15 UTC
+Date/Publication: 2025-04-16 00:10:07 UTC

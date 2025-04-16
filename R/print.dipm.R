@@ -353,7 +353,7 @@ survmean = function (x, scale = 1, rmean)
 }
 
 #' @importFrom survival survfit
-print.dipm = function(tree_txt, X, Y, C, treatment,
+print_dipm = function(tree_txt, X, Y, C, treatment,
                       types, ncat, method, ntree, print,
                       splitvar_include){
 #
