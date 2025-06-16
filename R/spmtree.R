@@ -181,10 +181,7 @@
 #'
 #' N = 300
 #' set.seed(123)
-#' 
-#' if (!identical(tolower(Sys.getenv("NOT_CRAN")), "true")){
-#' Sys.setenv(OMP_THREAD_LIMIT = "2")
-#' }
+#'
 #'
 #' # generate binary treatments
 #' treatment = rbinom(N, 1, 0.5)
@@ -611,6 +608,7 @@ spmtree = function(formula,
     mtry = 0
     nmin2 = 0
     maxdepth2 = 0
+    ncores = 1
 
 #    set types of R arguments to C
     storage.mode(ntree) = "integer"
@@ -628,6 +626,7 @@ spmtree = function(formula,
     storage.mode(maxdepth) = "integer"
     storage.mode(maxdepth2) = "integer"
     storage.mode(method) = "integer"
+    storage.mode(ncores) = "integer"
 
     tree = .Call("maketree",
                ntree = ntree,
@@ -645,6 +644,7 @@ spmtree = function(formula,
                maxdepth = maxdepth,
                maxdepth2 = maxdepth2,
                method = method,
+               ncores = ncores,
                environment(lm_R_to_C))
 
     rm(XC)

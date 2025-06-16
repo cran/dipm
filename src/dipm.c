@@ -6024,6 +6024,7 @@ maketree(SEXP R_ntree,
          SEXP R_maxdepth,
          SEXP R_maxdepth2,
          SEXP R_method,
+         SEXP R_ncores,
          SEXP in_namespace)
 
 //
@@ -6057,6 +6058,8 @@ maketree(SEXP R_ntree,
 //                      depth of embedded trees (when
 //                      applicable),
 //      "R_method" - an integer denoting the tree method.
+//      "R_ncores" - an integer specifying the user input
+//                   number of cores/threads.
 //
 //  Overall, this function returns a tree from C to R.
 //
@@ -6098,6 +6101,7 @@ maketree(SEXP R_ntree,
     PROTECT(R_mtry=coerceVector(R_mtry,INTSXP));
     PROTECT(R_maxdepth=coerceVector(R_maxdepth,INTSXP));
     PROTECT(R_method=coerceVector(R_method,INTSXP));
+    PROTECT(R_ncores=coerceVector(R_ncores,INTSXP));
 
     int ntree=INTEGER(R_ntree)[0];
     int n=INTEGER(R_n)[0];
@@ -6108,6 +6112,7 @@ maketree(SEXP R_ntree,
     int maxdepth=INTEGER(R_maxdepth)[0];
     int maxdepth2=INTEGER(R_maxdepth2)[0];
     int method=INTEGER(R_method)[0];
+    int uncores=INTEGER(R_ncores)[0];
 
     double *y=REAL(R_y);
     int *treat=INTEGER(R_treat);
@@ -6121,7 +6126,7 @@ maketree(SEXP R_ntree,
         data[i]=&REAL(R_data)[i*nc];
     }
 
-    UNPROTECT(8);  // unprotect last 8 protected R objects
+    UNPROTECT(9);  // unprotect last 9 protected R objects
 
 //   initialize tree object
     struct node *tree=calloc(MAXSIZE,sizeof(struct node));
@@ -6317,13 +6322,17 @@ maketree(SEXP R_ntree,
     }
 
 //   set number of cores for multiple-thread processing
+    int ncores = 1;
     #ifdef _OPENMP
-      int ncores=omp_get_num_procs();
-    #else
-      int ncores=1;
+      if (uncores <= 0){
+        ncores = omp_get_num_procs(); // auto-detect
+      }else{
+        ncores = uncores;
+      }
     #endif
-    if ( ntree < ncores ) ncores=ntree;
-
+    if ( ntree < ncores ) ncores = ntree;
+    if ( ncores < 1) ncores = 1; // for spmtree (ntree=0)
+    
 //   initialize root node
     tree[0].depth=1;
     tree[0].index=1;

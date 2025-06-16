@@ -46,9 +46,6 @@ Type 'q()' to quit R.
 > N = 100
 > set.seed(123)
 > 
-> if (!identical(tolower(Sys.getenv("NOT_CRAN")), "true")){
-+ Sys.setenv(OMP_THREAD_LIMIT = "2")
-+ }
 >
 > # generate binary treatments
 > treatment = rbinom(N, 1, 0.5)
@@ -127,9 +124,6 @@ DIPM Tree (Continuous Y, 2 treatments, yes mtry, ntree=100):
 > N = 100
 > set.seed(123)
 > 
-> if (!identical(tolower(Sys.getenv("NOT_CRAN")), "true")){
-+ Sys.setenv(OMP_THREAD_LIMIT = "2")
-+ }
 >
 > # generate binary treatments
 > treatment = rbinom(N, 1, 0.5)
@@ -227,9 +221,6 @@ DIPM Tree (Continuous Y, 2 treatments, yes mtry, ntree=100):
 > N = 300
 > set.seed(123)
 >
-> if (!identical(tolower(Sys.getenv("NOT_CRAN")), "true")){
-+ Sys.setenv(OMP_THREAD_LIMIT = "2")
-+ } 
 >
 > # generate binary treatments
 > treatment = rbinom(N, 1, 0.5)

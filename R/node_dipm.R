@@ -51,9 +51,6 @@
 #' N = 100
 #' set.seed(123)
 #' 
-#' if (!identical(tolower(Sys.getenv("NOT_CRAN")), "true")){
-#' Sys.setenv(OMP_THREAD_LIMIT = "2")
-#' }
 #'
 #' # generate binary treatments
 #' treatment = rbinom(N, 1, 0.5)

@@ -8,10 +8,10 @@
  */
 
 /* .Call calls */
-extern SEXP maketree(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP maketree(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-  {"maketree", (DL_FUNC) &maketree, 16},
+  {"maketree", (DL_FUNC) &maketree, 17},
   {NULL, NULL, 0}
 };
 

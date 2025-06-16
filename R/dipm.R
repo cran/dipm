@@ -57,6 +57,11 @@
 #'                  blank, the default is to grow each full, 
 #'                  embedded tree until the minimum node size
 #'                  \code{nmin2} is reached
+#' @param ncores An integer specifying the number of cores/threads 
+#'               to use with OpenMP; this argument is optional; if 
+#'               left blank, the default is 2; if a value less than
+#'               1 is provided, the number of cores will be 
+#'               auto-detected and used based on the system configuration 
 #' @param print A boolean (TRUE/FALSE) value, where TRUE prints
 #'              a more readable version of the final tree to the
 #'              screen
@@ -216,9 +221,6 @@
 #' N = 100
 #' set.seed(123)
 #' 
-#' if (!identical(tolower(Sys.getenv("NOT_CRAN")), "true")){
-#' Sys.setenv(OMP_THREAD_LIMIT = "2")
-#' }
 #' 
 #' # generate binary treatments
 #' treatment = rbinom(N, 1, 0.5)
@@ -409,6 +411,7 @@ dipm = function(formula,
                  mtry = Inf,
                  maxdepth = Inf,
                  maxdepth2 = Inf,
+                 ncores = 2,
                  print = TRUE,
                  dataframe = FALSE,
                  prune = FALSE){
@@ -686,6 +689,7 @@ dipm = function(formula,
     storage.mode(maxdepth) = "integer"
     storage.mode(maxdepth2) = "integer"
     storage.mode(method) = "integer"
+    storage.mode(ncores) = "integer"
 
     tree = .Call("maketree",
                ntree = ntree,
@@ -703,6 +707,7 @@ dipm = function(formula,
                maxdepth = maxdepth,
                maxdepth2 = maxdepth2,
                method = method,
+               ncores = ncores,
                environment(lm_R_to_C))
 
     rm(XC)
